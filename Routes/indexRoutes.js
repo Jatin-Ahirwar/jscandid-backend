@@ -17,7 +17,7 @@ router.post("/signup",adminsignup)
 
 router.post("/signin",adminsignin)
 
-router.get("/signout",adminsignout)
+router.get("/signout", isAuthenticated ,adminsignout)
 
 
 module.exports = router
