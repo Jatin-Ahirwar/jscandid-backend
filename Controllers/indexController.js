@@ -1,17 +1,21 @@
 const {catchAsyncError} = require("../Middlewares/catchAsyncError.js")
 const userModel = require("../Models/userModel.js");
 const { sendtoken } = require("../utils/SendToken.js");
-const ErrorHandler = require("../utils/ErrorHandler.js")
+const ErrorHandler = require("../utils/ErrorHandler.js");
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
     res.json({message:"secure"}); 
+})
+
+exports.admin = catchAsyncError(async (req,res,next)=>{
+    const admin = await userModel.findById(req.id)
+    res.json(admin)
 })
 
 exports.adminsignup = catchAsyncError(async (req,res,next)=>{
     const user = await new userModel(req.body).save()
     sendtoken(user,201,res)
 })
-
 
 exports.adminsignin = catchAsyncError(async (req,res,next)=>{
     const user = await userModel.findOne({email : req.body.email}).select("+password").exec()
@@ -26,7 +30,8 @@ exports.adminsignin = catchAsyncError(async (req,res,next)=>{
 })
 
 exports.adminsignout = catchAsyncError(async (req,res,next) =>{
-    
+    res.clearCookie("token")
+    res.json({message:"signout done"})
 })
 
 

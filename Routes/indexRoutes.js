@@ -4,10 +4,14 @@ const {
     homepage,
     adminsignup, 
     adminsignin, 
-    adminsignout
+    adminsignout,
+    admin
  } = require("../Controllers/indexController")
+const { isAuthenticated } = require("../Middlewares/auth")
 
-router.get("/",homepage)
+router.get("/", isAuthenticated ,homepage)
+
+router.post("/admin", isAuthenticated ,admin)
 
 router.post("/signup",adminsignup)
 
