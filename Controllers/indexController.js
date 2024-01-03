@@ -15,7 +15,15 @@ exports.homepage = catchAsyncError(async (req,res,next)=>{
 })
 
 exports.admin = catchAsyncError(async (req,res,next)=>{
-    const admin = await userModel.findById(req.id).populate("stories").populate("images").populate("prewedding").populate("trailer")
+    const admin = await userModel.findById(req.id)
+    .populate("stories")
+    .populate("images")
+    .populate("prewedding")
+    .populate("trailer")
+    .populate("kids")
+    .populate("maternity")
+    .populate("fashion")
+    .populate("event")
     res.json(admin)
 })
 
