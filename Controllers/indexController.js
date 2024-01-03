@@ -1,16 +1,21 @@
 const {catchAsyncError} = require("../Middlewares/catchAsyncError.js")
-const userModel = require("../Models/userModel.js");
 const { sendtoken } = require("../utils/SendToken.js");
+const userModel = require("../Models/userModel.js");
 const ErrorHandler = require("../utils/ErrorHandler.js");
 const storiesModel = require("../Models/stories.js")
 const imagesModel = require("../Models/images.js")
+const preweddingModel = require("../Models/prewedding.js")
+const trailerModel = require("../Models/trailer.js")
+const kidsModel = require("../Models/kids.js")
+const fashionModel = require("../Models/fashion.js")
+const eventModel = require("../Models/event.js")
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
     res.json({message:"secure"}); 
 })
 
 exports.admin = catchAsyncError(async (req,res,next)=>{
-    const admin = await userModel.findById(req.id).populate("stories").populate("images")
+    const admin = await userModel.findById(req.id).populate("stories").populate("images").populate("prewedding").populate("trailer")
     res.json(admin)
 })
 
@@ -120,7 +125,240 @@ exports.findsingleimages = catchAsyncError(async (req,res,next) =>{
 })
 
 
-
-
 // ------------------------------------------ images Closing ---------------------------------------
 
+
+
+// ------------------------------------------ prewedding Opening ---------------------------------------
+
+exports.createprewedding = catchAsyncError(async (req,res,next) =>{
+    try {
+        const user = await userModel.findById(req.id).exec()
+        const prewedding = await new preweddingModel(req.body).save()
+        prewedding.user = user._id
+        user.prewedding.push(prewedding._id)
+        await prewedding.save()
+        await user.save()
+        res.status(201).json({success:true , prewedding})
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findallprewedding = catchAsyncError(async (req,res,next) =>{
+    try {
+        const allprewedding = await preweddingModel.find().exec()
+        res.status(201).json({success:true , allprewedding })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+
+exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
+    try {
+        const singleimage = await preweddingModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleimage })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+        // console.log(error)
+    }
+})
+
+
+// ------------------------------------------ prewedding Closing ---------------------------------------
+
+
+
+// ------------------------------------------ trailer Opening ---------------------------------------
+
+exports.createtrailer = catchAsyncError(async (req,res,next) =>{
+    try {
+        const user = await userModel.findById(req.id).exec()
+        const trailer = await new trailerModel(req.body).save()
+        trailer.user = user._id
+        user.trailer.push(trailer._id)
+        await trailer.save()
+        await user.save()
+        res.status(201).json({success:true , trailer})
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findalltrailer = catchAsyncError(async (req,res,next) =>{
+    try {
+        const alltrailer = await trailerModel.find().exec()
+        res.status(201).json({success:true , alltrailer })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
+    try {
+        const singleimage = await trailerModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleimage })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+        // console.log(error)
+    }
+})
+
+
+// ------------------------------------------ trailer Closing ---------------------------------------
+
+
+
+// ------------------------------------------ kids Opening ---------------------------------------
+
+exports.createkids = catchAsyncError(async (req,res,next) =>{
+    try {
+        const user = await userModel.findById(req.id).exec()
+        const kids = await new kidsModel(req.body).save()
+        kids.user = user._id
+        user.kids.push(kids._id)
+        await kids.save()
+        await user.save()
+        res.status(201).json({success:true , kids})
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findallkids = catchAsyncError(async (req,res,next) =>{
+    try {
+        const allkids = await kidsModel.find().exec()
+        res.status(201).json({success:true , allkids })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findsinglekids = catchAsyncError(async (req,res,next) =>{
+    try {
+        const singleimage = await kidsModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleimage })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+        // console.log(error)
+    }
+})
+
+// ------------------------------------------ kids Closing ---------------------------------------
+
+
+
+// ------------------------------------------ maternity Opening ---------------------------------------
+
+exports.creatematernity = catchAsyncError(async (req,res,next) =>{
+    try {
+        const user = await userModel.findById(req.id).exec()
+        const maternity = await new maternityModel(req.body).save()
+        maternity.user = user._id
+        user.maternity.push(maternity._id)
+        await maternity.save()
+        await user.save()
+        res.status(201).json({success:true , maternity})
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findallmaternity = catchAsyncError(async (req,res,next) =>{
+    try {
+        const allmaternity = await maternityModel.find().exec()
+        res.status(201).json({success:true , allmaternity })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findsinglematernity = catchAsyncError(async (req,res,next) =>{
+    try {
+        const singleimage = await maternityModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleimage })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+        // console.log(error)
+    }
+})
+
+// ------------------------------------------ maternity Closing ---------------------------------------
+
+
+// ------------------------------------------ fashion Opening ---------------------------------------
+
+exports.createfashion = catchAsyncError(async (req, res, next) => {
+    try {
+        const user = await userModel.findById(req.id).exec()
+        const fashion = await new fashionModel(req.body).save()
+        fashion.user = user._id
+        user.fashion.push(fashion._id)
+        await fashion.save()
+        await user.save()
+        res.status(201).json({success:true , fashion})
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findallfashion = catchAsyncError(async (req,res,next) =>{
+    try {
+        const allfashion = await fashionModel.find().exec()
+        res.status(201).json({success:true , allfashion })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
+    try {
+        const singleimage = await fashionModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleimage })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+        // console.log(error)
+    }
+})
+
+// ------------------------------------------ fashion Closing ---------------------------------------
+
+
+
+// ------------------------------------------ event Opening ---------------------------------------
+
+exports.createevent = catchAsyncError(async (req, res, next) => {
+    try {
+        const user = await userModel.findById(req.id).exec()
+        const event = await new eventModel(req.body).save()
+        event.user = user._id
+        user.event.push(event._id)
+        await event.save()
+        await user.save()
+        res.status(201).json({success:true , event})
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findallevent = catchAsyncError(async (req,res,next) =>{
+    try {
+        const allevent = await eventModel.find().exec()
+        res.status(201).json({success:true , allevent })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+exports.findsingleevent = catchAsyncError(async (req,res,next) =>{
+    try {
+        const singleimage = await eventModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleimage })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+        // console.log(error)
+    }
+})
+
+// ------------------------------------------ event Closing ---------------------------------------

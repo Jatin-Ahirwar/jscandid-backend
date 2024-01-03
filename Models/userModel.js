@@ -27,36 +27,43 @@ const userModel = new mongoose.Schema({
             ref:"images"
         }
     ],
-    // fashion:[
-    //     {
-    //         type:mongoose.Schema.Types.ObjectId,
-    //         ref:"fashion"
-    //     }
-    // ],
-    // event:[
-    //     {
-    //         type:mongoose.Schema.Types.ObjectId,
-    //         ref:"event"
-    //     }
-    // ],
-    // kids:[
-    //     {
-    //         type:mongoose.Schema.Types.ObjectId,
-    //         ref:"kids"
-    //     }
-    // ],
-    // maternity:[
-    //     {
-    //         type:mongoose.Schema.Types.ObjectId,
-    //         ref:"maternity"
-    //     }
-    // ],
-    // trailer:[
-    //     {
-    //         type:mongoose.Schema.Types.ObjectId,
-    //         ref:"trailer"
-    //     }
-    // ]
+    prewedding:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"prewedding"
+        }
+    ],
+    trailer:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"trailer"
+        }
+    ],
+    fashion:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"fashion"
+        }
+    ],
+    event:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"event"
+        }
+    ],
+    kids:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"kids"
+        }
+    ],
+    maternity:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"maternity"
+        }
+    ],
+
 
 },{timestamps:true})
 
