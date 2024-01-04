@@ -13,6 +13,8 @@ const logger = require("morgan")
 app.use(logger("tiny"))
 
 // bodyparser
+// const bodyParser = require("body-parser")
+// app.use(bodyParser.urlencoded({extended:false}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -36,7 +38,7 @@ app.use("/" , require("./Routes/indexRoutes.js"))
 
 // error handling
 
-const ErrorHandler = require("./Utils/Errorhandler.js");
+const ErrorHandler = require("./utils/ErrorHandler.js")
 const { generatedErrors } = require("./Middlewares/error.js");
 app.all("*",(req,res,next) =>{
     next(new ErrorHandler(`Requested Url Not Found ${req.url}` , 404))

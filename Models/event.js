@@ -9,7 +9,7 @@ const eventModel = new mongoose.Schema({
     posterimage:String,
     eventimages:[{
         type:String,
-        required:[true, "image is required"],
+        required:[true, "event image is required"],
     }],
     creatername:[{
         type:String,

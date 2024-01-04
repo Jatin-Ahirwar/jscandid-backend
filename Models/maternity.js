@@ -5,9 +5,10 @@ const maternityModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    image:{
+    image:[{
         type:String,
-    },
+        required:[true, "image is required"],
+    }],
     ladyname:[{
         type:String,
         required:[true, "lady name is required"],

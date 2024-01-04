@@ -5,9 +5,10 @@ const kidsModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    image:{
+    image:[{
         type:String,
-    },
+        required:[true, "image is required"],
+    }],
     name:[{
         type:String,
         required:[true, "name is required"],

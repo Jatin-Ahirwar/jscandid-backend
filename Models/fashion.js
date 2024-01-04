@@ -17,7 +17,6 @@ const fashionModel = new mongoose.Schema({
         maxlength:[15,"model  name can not exceed 15 characters"],
         minlength:[2,"model  name should contain minimum 2 characters"]
     }],
-
 })
 
 const fashion = mongoose.model("fashion",fashionModel)

@@ -6,7 +6,10 @@ const storiesModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    posterimage:String,
+    posterimage:{
+        type:String,
+        required:[true,"posterimage is required"],
+    },
     storiesimages:{
         storiesfunction:[{
             functionname:{
@@ -16,7 +19,8 @@ const storiesModel = new mongoose.Schema({
                 minlength:[2,"function name should have atleast 6 characters"]    
             },
             functionimages:[{
-                type:String
+                type:String,
+                required:[true, "functionimages is required"],
             }]
         }]
     },

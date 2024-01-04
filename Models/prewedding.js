@@ -8,7 +8,8 @@ const preweddingModel = new mongoose.Schema({
     },
     posterimage:String,
     preweddingimages:[{
-        type:String
+        type:String,
+        required:[true, "prewedding images is required"],
     }],
     bridename:{
         type:String,

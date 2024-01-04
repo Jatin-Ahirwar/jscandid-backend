@@ -7,10 +7,11 @@ const imagesModel = new mongoose.Schema({
     },
     image:{
         type:String,
+        required:[true, "image is required"],
     },
 },{timestamps:true})
 
-const images = mongoose.model("images",imagesModel)
+const image = mongoose.model("image",imagesModel)
 
-module.exports = images
+module.exports = image
 

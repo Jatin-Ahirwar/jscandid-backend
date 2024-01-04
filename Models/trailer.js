@@ -2,7 +2,10 @@ const mongoose = require("mongoose")
 
 const trailerModel = new mongoose.Schema({
 
-    trailerposter:String,
+    trailerposter:{
+        type:String,
+        required:[true,"trailerposter is required"],
+    },
     date:{
         type:String,
         require:[true,"Date is required"]
