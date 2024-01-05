@@ -1,6 +1,5 @@
 const express = require("express")
 const router = express.Router()
-const multer = require("multer")
 const {
     upload,
     homepage,
@@ -71,25 +70,12 @@ router.post("/findsinglestories" ,findsinglestories)
 
 // ------------------------------------------ Images Opening ---------------------------------------
 
-
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb (null, './public/uploads')
-//     },
-//     filename: function (req, file , cb) {
-//       const nd = new Date()
-//       const fn = nd.getTime() + Math.floor(Math.random()*1000000) + path.extname(file.originalname)
-//       cb(null, file.fieldname + fn)
-//     }
-// })
-  
-// const upload = multer({ storage: storage })
-  
-
-
 // Post /createStories
+// router.post("/createImages",isAuthenticated,createimages)
 // router.post("/createImages",isAuthenticated,createimages,upload.single("image"))
-router.post("/createImages",isAuthenticated,createimages)
+router.post("/createImages", isAuthenticated, createimages, upload.single("image"));
+
+
 
 // Post /findallImages
 router.get("/findallImages" ,findallimages)

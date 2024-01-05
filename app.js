@@ -2,6 +2,7 @@ require("dotenv").config({path:'./.env'})
 const express = require('express');
 const app = express()
 const cors = require("cors")
+const path = require("path")
 
 // database connection
 require("./Models/database.js").connectDatabase()
@@ -17,6 +18,7 @@ app.use(logger("tiny"))
 // app.use(bodyParser.urlencoded({extended:false}))
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Session and cookies 
 const session = require("express-session")

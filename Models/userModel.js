@@ -24,7 +24,7 @@ const userModel = new mongoose.Schema({
     images:[
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref:"image"
+            ref:"images"
         }
     ],
     prewedding:[

@@ -14,20 +14,21 @@ const multer = require("multer")
 const path = require("path")
 
 
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb (null, './public/uploads')
+      cb(null, './public/uploads')
     },
-    filename: function (req, file , cb) {
+    filename: function (req, file, cb) {
       const nd = new Date()
       const fn = nd.getTime() + Math.floor(Math.random()*1000000) + path.extname(file.originalname)
       cb(null, file.fieldname + fn)
     }
-})
+  })
   
-// exports.upload = multer({ storage: storage })
-const upload = multer({ storage: storage })
-  
+exports.upload = multer({ storage: storage })
+// const upload = multer({ storage: storage })
+    
 
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
@@ -131,74 +132,13 @@ exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
 //     }
 // })
 
-// exports.createimages = catchAsyncError(async (req,res,next) =>{
-//     try {
-//         res.send(req.file)
-//     } catch (error) {
-//         console.log(error)
-//     }
-// })
-
 exports.createimages = catchAsyncError(async (req,res,next) =>{
     try {
-        // Assuming req.id represents the user's ID
-        const userId = req.id;
-
-        // Find the user by ID
-        const user = await userModel.findById(userId);
-
-        // Ensure the user exists
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
-        // Use multer middleware to handle file uploads
-        upload.single('image')(req, res, async function (err) {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ success: false, message: 'File upload failed' });
-            }
-
-            // Create a new image using the data from the request body and multer
-            const image = new imagesModel({
-                // Assuming other properties of the image are in req.body
-                // Adjust as needed based on your actual data structure
-                imageUrl: req.file.path
-            });
-
-            // Set the user reference in the image
-            image.user = userId;
-
-            // Save the image
-            await image.save();
-
-            // Add the image reference to the user's images array
-            user.images.push(image._id);
-
-            // Save the user
-            await user.save();
-
-            // Respond with success and the created image
-            res.status(201).json({ success: true, image });
-        });
+        res.json(req.json)
     } catch (error) {
-        // Handle errors
-        console.error(error);
-        res.status(500).json({ error });
+        res.status(500).json(error);
     }
 })
-
-// exports.createimages = catchAsyncError(async (req,res,next) =>{
-//     try {
-//         const { user, file } = req;
-//         const imageUrl = `./public/uploads/${file.filename}`; // Adjust this based on your file storage setup
-    
-//         const image = await imagesModel.create({ user, imageUrl });
-//         res.status(201).json(image);
-//       } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//       }})
 
 
 
