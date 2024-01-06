@@ -122,9 +122,10 @@ exports.createimages = catchAsyncError(async (req,res,next)=>{
         const userID = await userModel.findById(req.id).exec()
         const file = req.file;
         const newImage = new imagesModel({
-            user: userID,
+
             image: file.filename,
         });
+        newImage.user = userID._id
         userID.images.push(newImage._id)
         await newImage.save();
         await userID.save();

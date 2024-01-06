@@ -75,6 +75,8 @@ router.post("/findsinglestories" ,findsinglestories)
 // router.post("/createImages",isAuthenticated,createimages,upload.single("image"))
 router.post("/createImages", isAuthenticated , upload.single("image"), createimages);
 
+// router.post("/createImages", isAuthenticated , upload.array("image"), createimages);
+
 
 
 // Post /findallImages
