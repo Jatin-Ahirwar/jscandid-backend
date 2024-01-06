@@ -118,38 +118,18 @@ exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ Images Opening ---------------------------------------
 
-exports.createimages = catchAsyncError(async (req,res,next) =>{
-    try {
-        const user = await userModel.findById(req.id).exec()
-        const images = await new imagesModel(req.body).save()
-        images.user = user._id
-        user.images.push(images._id)
-        await images.save()
-        await user.save()
-        res.status(201).json({success:true , images})
-    } catch (error) {
-        res.status(500).json(error);
-    }
+exports.createimages = catchAsyncError(async (req,res,next)=>{
+        const userID = await userModel.findById(req.id).exec()
+        const file = req.file;
+        const newImage = new imagesModel({
+            user: userID,
+            image: file.filename,
+        });
+        userID.images.push(newImage._id)
+        await newImage.save();
+        await userID.save();
+        res.status(201).json({ message: true , newImage });
 })
-
-// exports.createimages = catchAsyncError(upload.single('image'), async (req, res, next) => {
-//     try {
-//         const images = req.file;
-//         res.status(201).json({ success: true, images });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ success: false, error: 'Internal Server Error' });
-//     }
-// });
-
-// exports.createimages = catchAsyncError(async (req,res,next) =>{
-//     try {
-//         res.json(req.body)
-//     } catch (error) {
-//         res.status(500).json(error);
-//     }
-// })
-
 
 
 exports.findallimages = catchAsyncError(async (req,res,next) =>{
@@ -260,19 +240,29 @@ exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ kids Opening ---------------------------------------
 
+// exports.createkids = catchAsyncError(async (req,res,next) =>{
+//         // const user = await userModel.findById(req.id).exec()
+//         // const kids = await new kidsModel(req.body)
+//         // kids.user = user._id
+//         // user.kids.push(kids._id)
+//         // await kids.save()
+//         // await user.save()
+//         // res.status(201).json({success:true , kids})
+//         const body = req.body;
+//         console.log(body)
+// })
+
+
 exports.createkids = catchAsyncError(async (req,res,next) =>{
-    try {
-        const user = await userModel.findById(req.id).exec()
-        const kids = await new kidsModel(req.body).save()
-        kids.user = user._id
-        user.kids.push(kids._id)
-        await kids.save()
-        await user.save()
-        res.status(201).json({success:true , kids})
-    } catch (error) {
-        // res.status(500).json({ error: 'Internal Server Error' });
-        res.status(500).json(error);
-    }
+        // const user = await userModel.findById(req.id).exec()
+        // const kids = await new kidsModel(req.body)
+        // kids.user = user._id
+        // user.kids.push(kids._id)
+        // await kids.save()    
+        // await user.save()    
+        // res.status(201).json({success:true , kids})
+        const body = req.body;
+        res.json(body)
 })
 
 exports.findallkids = catchAsyncError(async (req,res,next) =>{

@@ -73,7 +73,7 @@ router.post("/findsinglestories" ,findsinglestories)
 // Post /createStories
 // router.post("/createImages",isAuthenticated,createimages)
 // router.post("/createImages",isAuthenticated,createimages,upload.single("image"))
-router.post("/createImages", isAuthenticated, createimages, upload.single("image"));
+router.post("/createImages", isAuthenticated , upload.single("image"), createimages);
 
 
 
@@ -115,7 +115,8 @@ router.get("/findsingletrailer/:id" ,findsingletrailer)
 // ------------------------------------------ kids Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createkids", isAuthenticated ,createkids,upload.single("image"))
+// router.post("/createkids", isAuthenticated ,createkids,upload.single("image"))
+router.post("/createkids", isAuthenticated ,createkids)
 
 // Post /findallkids
 router.get("/findallkids" ,findallkids)
