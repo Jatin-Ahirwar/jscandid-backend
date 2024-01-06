@@ -3,6 +3,10 @@ const express = require('express');
 const app = express()
 const cors = require("cors")
 const path = require("path")
+const fileUpload = require("express-fileupload");
+const expressFileuploader = require("express-fileuploader");
+var bodyParser = require('body-parser')
+
 
 // database connection
 require("./Models/database.js").connectDatabase()
@@ -14,10 +18,11 @@ const logger = require("morgan")
 app.use(logger("tiny"))
 
 // bodyparser
-// const bodyParser = require("body-parser")
-// app.use(bodyParser.urlencoded({extended:false}))
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Session and cookies 
@@ -32,8 +37,9 @@ app.use(session({
 app.use(cookieparser())
 
 // express file-upload
-const fileupload = require("express-fileupload")
-app.use(fileupload())
+// app.use(fileUpload())
+
+
 
 // routes
 app.use("/" , require("./Routes/indexRoutes.js"))

@@ -115,7 +115,7 @@ router.get("/findsingletrailer/:id" ,findsingletrailer)
 // ------------------------------------------ kids Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createkids", isAuthenticated ,createkids)
+router.post("/createkids", isAuthenticated ,createkids,upload.single("image"))
 
 // Post /findallkids
 router.get("/findallkids" ,findallkids)
