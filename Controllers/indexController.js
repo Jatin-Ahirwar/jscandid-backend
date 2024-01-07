@@ -120,16 +120,36 @@ exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
 
 exports.createimages = catchAsyncError(async (req,res,next)=>{
         const userID = await userModel.findById(req.id).exec()
-        const file = req.file;
-        const newImage = new imagesModel({
 
-            image: file.filename,
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: "No files provided" });
+        }
+
+        const filenames = [];
+        req.files.forEach((file) => {
+            filenames.push(file.filename);
         });
-        newImage.user = userID._id
-        userID.images.push(newImage._id)
-        await newImage.save();
-        await userID.save();
-        res.status(201).json({ message: true , newImage });
+
+        const existingImages = await imagesModel.findOne({ user: userID._id });
+
+        // res.json(existingImages)
+
+        if(!existingImages){
+            const newImages = new imagesModel({
+                images: filenames,
+            });
+            newImages.user = userID._id
+            userID.images.push(newImages._id)
+            await newImages.save();
+            await userID.save();
+            res.status(201).json({ message: true , newImages });    
+        }
+        else{
+            existingImages.images = existingImages.images.concat(filenames)    
+            await existingImages.save();
+            res.status(201).json({ message: true , existingImages });
+
+        }
 })
 
 

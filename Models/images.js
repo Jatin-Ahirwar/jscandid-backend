@@ -5,10 +5,10 @@ const imagesModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    image:{
+    images:[{
         type:String,
         required:[true, "image is required"],
-    },
+    }],
 },{timestamps:true})
 
 const images = mongoose.model("images",imagesModel)

@@ -30,7 +30,8 @@ const {
     findsinglefashion,
     createevent,
     findallevent,
-    findsingleevent
+    findsingleevent,
+    createmultipleimages
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -70,14 +71,9 @@ router.post("/findsinglestories" ,findsinglestories)
 
 // ------------------------------------------ Images Opening ---------------------------------------
 
-// Post /createStories
-// router.post("/createImages",isAuthenticated,createimages)
-// router.post("/createImages",isAuthenticated,createimages,upload.single("image"))
-router.post("/createImages", isAuthenticated , upload.single("image"), createimages);
 
-// router.post("/createImages", isAuthenticated , upload.array("image"), createimages);
-
-
+// Post /createMultipleImages
+router.post("/createImages", isAuthenticated , upload.array("images"), createimages);
 
 // Post /findallImages
 router.get("/findallImages" ,findallimages)
