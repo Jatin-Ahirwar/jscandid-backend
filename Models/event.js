@@ -11,12 +11,12 @@ const eventModel = new mongoose.Schema({
         type:String,
         required:[true, "event image is required"],
     }],
-    creatername:[{
+    creatername:{
         type:String,
         required:[true, "creatername is required"],
         maxlength:[15,"creater name can not exceed 15 characters"],
         minlength:[2,"creater name should contain minimum 2 characters"]
-    }],
+    },
 })
 
 const event = mongoose.model("event",eventModel)

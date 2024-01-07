@@ -31,7 +31,7 @@ const {
     createevent,
     findallevent,
     findsingleevent,
-    createmultipleimages
+    deletesingleimages,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -66,20 +66,24 @@ router.get("/findallstories" ,findallstories)
 // Post /findsinglestories
 router.post("/findsinglestories" ,findsinglestories)
 
+
 // ------------------------------------------ Stories Closing ---------------------------------------
 
 
 // ------------------------------------------ Images Opening ---------------------------------------
 
-
 // Post /createMultipleImages
 router.post("/createImages", isAuthenticated , upload.array("images"), createimages);
 
 // Post /findallImages
-router.get("/findallImages" ,findallimages)
+router.post("/findallImages" ,findallimages)
 
 // Post /findsingleImages
-router.get("/findsingleImages/:id" ,findsingleimages)
+router.post("/findsingleImages/:index" ,findsingleimages)
+
+// Post /deletesingleImages
+router.post("/deletesingleImages/:index" , isAuthenticated , deletesingleimages)
+
 
 // ------------------------------------------ Images Closing ---------------------------------------
 
@@ -97,6 +101,7 @@ router.get("/findsingleprewedding/:id" ,findsingleprewedding)
 
 // ------------------------------------------ prewedding Closing ---------------------------------------
 
+
 // ------------------------------------------ trailer Opening ---------------------------------------
 
 // Post /createStories
@@ -110,17 +115,17 @@ router.get("/findsingletrailer/:id" ,findsingletrailer)
 
 // ------------------------------------------ trailer Closing ---------------------------------------
 
+
 // ------------------------------------------ kids Opening ---------------------------------------
 
 // Post /createStories
-// router.post("/createkids", isAuthenticated ,createkids,upload.single("image"))
-router.post("/createkids", isAuthenticated ,createkids)
+router.post("/createkids", isAuthenticated , upload.array("images") ,createkids)
 
 // Post /findallkids
-router.get("/findallkids" ,findallkids)
+router.post("/findallkids" ,findallkids)
 
 // Post /findsinglekids
-router.get("/findsinglekids/:id" ,findsinglekids)
+router.post("/findsinglekids/:index" ,findsinglekids)
 
 // ------------------------------------------ kids Closing ---------------------------------------
 

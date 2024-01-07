@@ -132,8 +132,6 @@ exports.createimages = catchAsyncError(async (req,res,next)=>{
 
         const existingImages = await imagesModel.findOne({ user: userID._id });
 
-        // res.json(existingImages)
-
         if(!existingImages){
             const newImages = new imagesModel({
                 images: filenames,
@@ -152,26 +150,45 @@ exports.createimages = catchAsyncError(async (req,res,next)=>{
         }
 })
 
-
 exports.findallimages = catchAsyncError(async (req,res,next) =>{
-    try {
-        const allimages = await imagesModel.find().exec()
-        res.status(201).json({success:true , allimages })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+    
+    const allImages = await imagesModel.find({}, 'images').exec();
+
+    if (allImages && allImages.length > 0) {
+      const imagesArray = allImages.map(userImages => userImages.images).flat();
+      res.status(200).json({ success: true, images: imagesArray });
+    } else {
+      res.status(404).json({ error: 'No images found' });
     }
 })
+ 
+exports.findsingleimages = catchAsyncError(async (req, res, next) => {
+    const imageIndex = req.params.index;
 
+    const result = await imagesModel.findOne({}).exec();
 
-exports.findsingleimages = catchAsyncError(async (req,res,next) =>{
-    try {
-        const singleimage = await imagesModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singleimage })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-        // console.log(error)
+    if (result && result.images && result.images.length > imageIndex) {
+      const singleImage = result.images[imageIndex];
+      res.status(201).json({ success: true, singleImage });
+    } else {
+      res.status(404).json({ error: 'Image not found' });
     }
-})
+});
+
+exports.deletesingleimages = catchAsyncError(async (req, res, next) => {
+    
+    const imageIndex = req.params.index;
+    const imagesArray = await imagesModel.find().exec();
+
+    if (imagesArray) {
+      const singleImage = await imagesArray.images.splice(imageIndex,1);
+      await singleImage.save()
+      res.status(201).json({ success: true, imagesArray });
+    } else {
+      res.status(404).json({ error: 'Image not found' });
+    }
+
+});
 
 
 // ------------------------------------------ images Closing ---------------------------------------
@@ -261,49 +278,68 @@ exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ kids Opening ---------------------------------------
 
-// exports.createkids = catchAsyncError(async (req,res,next) =>{
-//         // const user = await userModel.findById(req.id).exec()
-//         // const kids = await new kidsModel(req.body)
-//         // kids.user = user._id
-//         // user.kids.push(kids._id)
-//         // await kids.save()
-//         // await user.save()
-//         // res.status(201).json({success:true , kids})
-//         const body = req.body;
-//         console.log(body)
-// })
 
 
-exports.createkids = catchAsyncError(async (req,res,next) =>{
-        // const user = await userModel.findById(req.id).exec()
-        // const kids = await new kidsModel(req.body)
-        // kids.user = user._id
-        // user.kids.push(kids._id)
-        // await kids.save()    
-        // await user.save()    
-        // res.status(201).json({success:true , kids})
-        const body = req.body;
-        res.json(body)
+exports.createkids = catchAsyncError(async (req,res,next)=>{
+        const userID = await userModel.findById(req.id).exec()
+
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: "No files provided" });
+        }
+
+        const filenames = [];
+        req.files.forEach((file) => {
+            filenames.push(file.filename);
+        });
+
+        const existingImages = await kidsModel.findOne({ user: userID._id });
+
+        if(!existingImages){
+            const newImages = new kidsModel({
+                images: filenames,
+            });
+            newImages.user = userID._id
+            userID.images.push(newImages._id)
+            await newImages.save();
+            await userID.save();
+            res.status(201).json({ message: true , newImages });    
+        }
+        else{
+            existingImages.images = existingImages.images.concat(filenames)    
+            await existingImages.save();
+            res.status(201).json({ message: true , existingImages });
+        }
 })
+
 
 exports.findallkids = catchAsyncError(async (req,res,next) =>{
-    try {
-        const allkids = await kidsModel.find().exec()
-        res.status(201).json({success:true , allkids })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+    
+    const allImages = await kidsModel.find({}, 'images').exec();
+
+    if (allImages && allImages.length > 0) {
+      const imagesArray = allImages.map(userImages => userImages.images).flat();
+      res.status(200).json({ success: true, images: imagesArray });
+    } else {
+      res.status(404).json({ error: 'No images found' });
     }
 })
 
-exports.findsinglekids = catchAsyncError(async (req,res,next) =>{
-    try {
-        const singleimage = await kidsModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singleimage })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-        // console.log(error)
+
+  
+exports.findsinglekids = catchAsyncError(async (req, res, next) => {
+    const imageIndex = req.params.index;
+
+    const result = await kidsModel.findOne({}).exec();
+
+    if (result && result.images && result.images.length > imageIndex) {
+      const singleImage = result.images[imageIndex];
+      res.status(201).json({ success: true, singleImage });
+    } else {
+      res.status(404).json({ error: 'Image not found' });
     }
-})
+});
+
+
 
 // ------------------------------------------ kids Closing ---------------------------------------
 
