@@ -176,7 +176,6 @@ exports.findsingleimages = catchAsyncError(async (req, res, next) => {
 });
 
 exports.deletesingleimages = catchAsyncError(async (req, res, next) => {
-    
     const imageIndex = req.params.index;
     const imagesArray = await imagesModel.find().exec();
 
@@ -187,7 +186,6 @@ exports.deletesingleimages = catchAsyncError(async (req, res, next) => {
     } else {
       res.status(404).json({ error: 'Image not found' });
     }
-
 });
 
 
@@ -220,7 +218,6 @@ exports.findallprewedding = catchAsyncError(async (req,res,next) =>{
     }
 })
 
-
 exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
     try {
         const singleimage = await preweddingModel.findById(req.params.id).exec()
@@ -238,27 +235,42 @@ exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ trailer Opening ---------------------------------------
 
-exports.createtrailer = catchAsyncError(async (req,res,next) =>{
-    try {
-        const user = await userModel.findById(req.id).exec()
-        const trailer = await new trailerModel(req.body).save()
-        trailer.user = user._id
-        user.trailer.push(trailer._id)
-        await trailer.save()
-        await user.save()
-        res.status(201).json({success:true , trailer})
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+exports.createtrailer = catchAsyncError(async (req,res,next)=>{
+    const userID = await userModel.findById(req.id).exec()
+
+    // Assuming you're sending other data in the request body
+        const { date, bridename, groomname, location, country } = req.body;
+
+        // Create a new trailer document
+        const newTrailer = new trailerModel({
+            date,
+            bridename,
+            groomname,
+            location,
+            country,
+        });
+
+        // Check if trailerposter and trailervideo files are present in the request
+        if (!req.files['trailerposter'] || !req.files['trailervideo']) {
+            return res.status(400).json({ message: 'Both trailerposter and trailervideo are required' });
+        }
+
+        // Save file paths or data to the newTrailer document
+        newTrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
+        newTrailer.trailervideo = req.files['trailervideo'][0].filename;
+
+        // Save the new trailer document to the database
+        newTrailer.user = userID._id
+        userID.trailer.push(newTrailer._id)
+        const savedTrailer = await newTrailer.save();
+        await userID.save()
+
+        res.status(201).json(savedTrailer);
 })
 
 exports.findalltrailer = catchAsyncError(async (req,res,next) =>{
-    try {
-        const alltrailer = await trailerModel.find().exec()
-        res.status(201).json({success:true , alltrailer })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const alltrailers = await trailerModel.find().exec()
+    res.json(alltrailers)
 })
 
 exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
@@ -271,14 +283,11 @@ exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
     }
 })
 
-
 // ------------------------------------------ trailer Closing ---------------------------------------
 
 
 
 // ------------------------------------------ kids Opening ---------------------------------------
-
-
 
 exports.createkids = catchAsyncError(async (req,res,next)=>{
         const userID = await userModel.findById(req.id).exec()
@@ -311,7 +320,6 @@ exports.createkids = catchAsyncError(async (req,res,next)=>{
         }
 })
 
-
 exports.findallkids = catchAsyncError(async (req,res,next) =>{
     
     const allImages = await kidsModel.find({}, 'images').exec();
@@ -324,8 +332,6 @@ exports.findallkids = catchAsyncError(async (req,res,next) =>{
     }
 })
 
-
-  
 exports.findsinglekids = catchAsyncError(async (req, res, next) => {
     const imageIndex = req.params.index;
 
@@ -339,8 +345,6 @@ exports.findsinglekids = catchAsyncError(async (req, res, next) => {
     }
 });
 
-
-
 // ------------------------------------------ kids Closing ---------------------------------------
 
 
@@ -348,35 +352,55 @@ exports.findsinglekids = catchAsyncError(async (req, res, next) => {
 // ------------------------------------------ maternity Opening ---------------------------------------
 
 exports.creatematernity = catchAsyncError(async (req,res,next) =>{
-    try {
-        const user = await userModel.findById(req.id).exec()
-        const maternity = await new maternityModel(req.body).save()
-        maternity.user = user._id
-        user.maternity.push(maternity._id)
-        await maternity.save()
+    const user = await userModel.findById(req.id).exec()
+    
+    if (!req.files || req.files.length === 0) {
+        return res.status(404).json({ message: "no images found"})
+    }
+
+    const filenames = []
+    req.files.forEach((file) =>{
+        filenames.push(file.filename)
+    })
+
+    const existingImages = await maternityModel.findOne({ user: user._id });
+
+    if(!existingImages) {
+        const newImages =  new maternityModel({
+            images:filenames
+        })
+        newImages.user = user._id
+        user.maternity.push(newImages._id)
+        await newImages.save()
         await user.save()
-        res.status(201).json({success:true , maternity})
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(200).json({success: true , newImages})
+    }
+    else{
+        existingImages.images = existingImages.images.concat(filenames)
+        await existingImages.save()
+        res.status(200).json({message : true , existingImages})
     }
 })
 
 exports.findallmaternity = catchAsyncError(async (req,res,next) =>{
-    try {
-        const allmaternity = await maternityModel.find().exec()
-        res.status(201).json({success:true , allmaternity })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+    const allimages = await maternityModel.find({} ,"images").exec()
+    if(allimages?.length > 0 ){
+        const imagesArray = allimages.map(userimages => userimages.images).flat()
+        res.status(200).json({message: true , imagesArray})
     }
+    res.status(404).json({message: "no images found" , })
 })
 
 exports.findsinglematernity = catchAsyncError(async (req,res,next) =>{
-    try {
-        const singleimage = await maternityModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singleimage })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-        // console.log(error)
+    const imageIndex = req.params.index;
+
+    const result = await maternityModel.findOne({}).exec();
+
+    if (result && result.images && result.images.length > imageIndex) {
+      const singleImage = result.images[imageIndex];
+      res.status(201).json({ success: true, singleImage });
+    } else {
+      res.status(404).json({ error: 'Image not found' });
     }
 })
 

@@ -1,7 +1,10 @@
 const mongoose = require("mongoose")
 
 const trailerModel = new mongoose.Schema({
-
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"user"
+    },
     trailerposter:{
         type:String,
         required:[true,"trailerposter is required"],
@@ -34,7 +37,6 @@ const trailerModel = new mongoose.Schema({
         type:String,
         require:[true,"Video is required"]
     },
-    
 })
 
 const trailer = mongoose.model( "trailer" , trailerModel )

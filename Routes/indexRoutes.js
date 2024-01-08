@@ -61,7 +61,7 @@ router.get("/signout", isAuthenticated ,adminsignout)
 router.post("/createStories",isAuthenticated ,createstories)
 
 // Post /findallstories
-router.get("/findallstories" ,findallstories)
+router.post("/findallstories" ,findallstories)
 
 // Post /findsinglestories
 router.post("/findsinglestories" ,findsinglestories)
@@ -94,10 +94,10 @@ router.post("/deletesingleImages/:index" , isAuthenticated , deletesingleimages)
 router.post("/createprewedding", isAuthenticated ,createprewedding)
 
 // Post /findallprewedding
-router.get("/findallprewedding" ,findallprewedding)
+router.post("/findallprewedding" ,findallprewedding)
 
 // Post /findsingleprewedding
-router.get("/findsingleprewedding/:id" ,findsingleprewedding)
+router.post("/findsingleprewedding/:id" ,findsingleprewedding)
 
 // ------------------------------------------ prewedding Closing ---------------------------------------
 
@@ -105,13 +105,17 @@ router.get("/findsingleprewedding/:id" ,findsingleprewedding)
 // ------------------------------------------ trailer Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createtrailer", isAuthenticated ,createtrailer)
+
+router.post("/createtrailer", isAuthenticated , upload.fields([
+    {name:"trailerposter" , maxCount: 1} , 
+    {name:"trailervideo" , maxCount: 1}
+])  ,createtrailer)
 
 // Post /findalltrailer
-router.get("/findalltrailer" ,findalltrailer)
+router.post("/findalltrailer" ,findalltrailer)
 
 // Post /findsingletrailer
-router.get("/findsingletrailer/:id" ,findsingletrailer)
+router.post("/findsingletrailer/:id" ,findsingletrailer)
 
 // ------------------------------------------ trailer Closing ---------------------------------------
 
@@ -130,17 +134,16 @@ router.post("/findsinglekids/:index" ,findsinglekids)
 // ------------------------------------------ kids Closing ---------------------------------------
 
 
-
 // ------------------------------------------ maternity Opening ---------------------------------------
 
 // Post /createStories
-router.post("/creatematernity", isAuthenticated ,creatematernity)
+router.post("/creatematernity", isAuthenticated , upload.array("images") ,creatematernity)
 
 // Post /findallmaternity
-router.get("/findallmaternity" ,findallmaternity)
+router.post("/findallmaternity" ,findallmaternity)
 
 // Post /findsinglematernity
-router.get("/findsinglematernity/:id" ,findsinglematernity)
+router.post("/findsinglematernity/:index" ,findsinglematernity)
 
 // ------------------------------------------ maternity Closing ---------------------------------------
 
@@ -150,10 +153,10 @@ router.get("/findsinglematernity/:id" ,findsinglematernity)
 router.post("/createfashion", isAuthenticated ,createfashion)
 
 // Post /findallfashion
-router.get("/findallfashion" ,findallfashion)
+router.post("/findallfashion" ,findallfashion)
 
 // Post /findsinglefashion
-router.get("/findsinglefashion/:id" ,findsinglefashion)
+router.post("/findsinglefashion/:id" ,findsinglefashion)
 
 // ------------------------------------------ fashion Closing ---------------------------------------
 
@@ -164,10 +167,10 @@ router.get("/findsinglefashion/:id" ,findsinglefashion)
 router.post("/createevent", isAuthenticated ,createevent)
 
 // Post /findallevent
-router.get("/findallevent" ,findallevent)
+router.post("/findallevent" ,findallevent)
 
 // Post /findsingleevent
-router.get("/findsingleevent/:id" ,findsingleevent)
+router.post("/findsingleevent/:id" ,findsingleevent)
 
 // ------------------------------------------ event Closing ---------------------------------------
 
