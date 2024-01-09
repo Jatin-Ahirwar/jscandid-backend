@@ -7,11 +7,12 @@ const fashionModel = new mongoose.Schema({
         ref:"user"
     },
     posterimage:String,
-    fashionimages:[{
+    images:[{
         type:String,
         required:[true, "image is required"]
     }],
     modelname:{
+        unique: true,
         type:String,
         required:[true, "model name is required"],
         maxlength:[15,"model  name can not exceed 15 characters"],

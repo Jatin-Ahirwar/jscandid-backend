@@ -32,6 +32,7 @@ const {
     findallevent,
     findsingleevent,
     deletesingleimages,
+    updatesinglefashion,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -150,7 +151,10 @@ router.post("/findsinglematernity/:index" ,findsinglematernity)
 // ------------------------------------------ fashion Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createfashion", isAuthenticated ,createfashion)
+router.post("/createfashion", isAuthenticated, upload.fields([
+    {name:"posterimage" , maxCount: 1},
+    {name:"images" , maxCount: 20}
+]) ,createfashion)
 
 // Post /findallfashion
 router.post("/findallfashion" ,findallfashion)
@@ -158,13 +162,19 @@ router.post("/findallfashion" ,findallfashion)
 // Post /findsinglefashion
 router.post("/findsinglefashion/:id" ,findsinglefashion)
 
+// Post /updatesinglefashion
+router.post("/updatesinglefashion/:id" ,updatesinglefashion)
+
 // ------------------------------------------ fashion Closing ---------------------------------------
 
 
 // ------------------------------------------ event Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createevent", isAuthenticated ,createevent)
+router.post("/createevent", isAuthenticated, upload.fields([
+    {name:"posterimage" , maxCount: 1},
+    {name:"images" , maxCount: 20}
+])  ,createevent)
 
 // Post /findallevent
 router.post("/findallevent" ,findallevent)

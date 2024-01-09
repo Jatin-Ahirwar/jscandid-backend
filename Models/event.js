@@ -7,15 +7,16 @@ const eventModel = new mongoose.Schema({
         ref:"user"
     },
     posterimage:String,
-    eventimages:[{
+    images:[{
         type:String,
         required:[true, "event image is required"],
     }],
-    creatername:{
+    modelname:{
+        unique: true,
         type:String,
-        required:[true, "creatername is required"],
-        maxlength:[15,"creater name can not exceed 15 characters"],
-        minlength:[2,"creater name should contain minimum 2 characters"]
+        required:[true, " model name is required"],
+        maxlength:[15,"model name can not exceed 15 characters"],
+        minlength:[2,"model name should contain minimum 2 characters"]
     },
 })
 

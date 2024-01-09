@@ -308,7 +308,7 @@ exports.createkids = catchAsyncError(async (req,res,next)=>{
                 images: filenames,
             });
             newImages.user = userID._id
-            userID.images.push(newImages._id)
+            userID.kids.push(newImages._id)
             await newImages.save();
             await userID.save();
             res.status(201).json({ message: true , newImages });    
@@ -410,26 +410,32 @@ exports.findsinglematernity = catchAsyncError(async (req,res,next) =>{
 // ------------------------------------------ fashion Opening ---------------------------------------
 
 exports.createfashion = catchAsyncError(async (req, res, next) => {
-    try {
-        const user = await userModel.findById(req.id).exec()
-        const fashion = await new fashionModel(req.body).save()
-        fashion.user = user._id
-        user.fashion.push(fashion._id)
-        await fashion.save()
-        await user.save()
-        res.status(201).json({success:true , fashion})
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const user = await userModel.findById(req.id).exec()
+    const { modelname } = req.body;
+
+
+    const newFashion = new fashionModel({
+        modelname,
+     });
+
+     if (!req.files['posterimage'] || req.files['images'].length === 0) {
+         return res.status(400).json({ message: 'At least one image is required' });
+     }
+
+     newFashion.posterimage = req.files['posterimage'][0].filename
+     newFashion.images = req.files['images'].map(file => file.filename)
+
+     newFashion.user = user._id
+     user.fashion.push(newFashion._id)
+     await newFashion.save();
+     await user.save();
+
+     res.status(201).json(newFashion);
 })
 
 exports.findallfashion = catchAsyncError(async (req,res,next) =>{
-    try {
-        const allfashion = await fashionModel.find().exec()
-        res.status(201).json({success:true , allfashion })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const allfashion = await fashionModel.find().exec()
+    res.status(200).json({ success : true , allfashion})
 })
 
 exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
@@ -438,8 +444,15 @@ exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
         res.status(201).json({success:true , singleimage })
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
-        // console.log(error)
     }
+})
+
+exports.updatesinglefashion = catchAsyncError(async (req,res,next) =>{
+    const singleimage = await fashionModel.findById(req.params.id).exec()
+    
+    
+    
+    res.status(201).json({success:true , singleimage })
 })
 
 // ------------------------------------------ fashion Closing ---------------------------------------
@@ -449,36 +462,44 @@ exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
 // ------------------------------------------ event Opening ---------------------------------------
 
 exports.createevent = catchAsyncError(async (req, res, next) => {
-    try {
-        const user = await userModel.findById(req.id).exec()
-        const event = await new eventModel(req.body).save()
-        event.user = user._id
-        user.event.push(event._id)
-        await event.save()
-        await user.save()
-        res.status(201).json({success:true , event})
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const user = await userModel.findById(req.id).exec()
+    const { modelname } = req.body;
+
+
+    const newEvent = new eventModel({
+        modelname,
+     });
+
+     if (!req.files['posterimage'] || req.files['images'].length === 0) {
+         return res.status(400).json({ message: 'At least one image is required' });
+     }
+
+     newEvent.posterimage = req.files['posterimage'][0].filename
+     newEvent.images = req.files['images'].map(file => file.filename)
+
+     newEvent.user = user._id
+     user.event.push(newEvent._id)
+     await newEvent.save();
+     await user.save();
+
+     res.status(201).json(newEvent);
 })
 
 exports.findallevent = catchAsyncError(async (req,res,next) =>{
-    try {
-        const allevent = await eventModel.find().exec()
-        res.status(201).json({success:true , allevent })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const allevent = await eventModel.find().exec()
+    res.status(200).json({ success : true , allevent})
 })
 
 exports.findsingleevent = catchAsyncError(async (req,res,next) =>{
     try {
-        const singleimage = await eventModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singleimage })
+        const singleevent = await eventModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleevent })
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
-        // console.log(error)
     }
 })
+
+
+
 
 // ------------------------------------------ event Closing ---------------------------------------
