@@ -92,7 +92,11 @@ router.post("/deletesingleImages/:index" , isAuthenticated , deletesingleimages)
 // ------------------------------------------ prewedding Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createprewedding", isAuthenticated ,createprewedding)
+router.post("/createprewedding", isAuthenticated, upload.fields([
+    {name:"posterimage" , maxCount: 1},
+    {name:"teaser" , maxCount: 1},
+    {name:"images" , maxCount: 20}
+])  ,createprewedding)
 
 // Post /findallprewedding
 router.post("/findallprewedding" ,findallprewedding)

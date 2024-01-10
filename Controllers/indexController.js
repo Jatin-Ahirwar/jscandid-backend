@@ -192,45 +192,51 @@ exports.deletesingleimages = catchAsyncError(async (req, res, next) => {
 // ------------------------------------------ images Closing ---------------------------------------
 
 
-
 // ------------------------------------------ prewedding Opening ---------------------------------------
 
 exports.createprewedding = catchAsyncError(async (req,res,next) =>{
-    try {
         const user = await userModel.findById(req.id).exec()
-        const prewedding = await new preweddingModel(req.body).save()
-        prewedding.user = user._id
-        user.prewedding.push(prewedding._id)
-        await prewedding.save()
+        const { bridename , groomname , date ,country , location , } = req.body
+
+        const posterimage = req.files['posterimage'][0].filename;
+        const teaser = req.files['teaser'][0].filename;
+
+        const newPrewedding = new preweddingModel({
+            posterimage,
+            teaser,
+            bridename,
+            groomname,
+            date,
+            country,
+            location,
+        });
+
+        if (!req.files['images'] || req.files['images'].length === 0) {
+            return res.status(400).json({ message: 'At least one image is required' });
+        }
+
+        newPrewedding.images = req.files['images'].map(file => file.filename); // Assuming Multer renames the files and provides the filenames
+        
+        newPrewedding.user = user._id
+        user.prewedding.push(newPrewedding._id)
+        await newPrewedding.save()
         await user.save()
-        res.status(201).json({success:true , prewedding})
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+        res.status(201).json({success:true , newPrewedding})
+    
 })
 
 exports.findallprewedding = catchAsyncError(async (req,res,next) =>{
-    try {
         const allprewedding = await preweddingModel.find().exec()
         res.status(201).json({success:true , allprewedding })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
 })
 
 exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
-    try {
         const singleimage = await preweddingModel.findById(req.params.id).exec()
         res.status(201).json({success:true , singleimage })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-        // console.log(error)
-    }
 })
 
 
 // ------------------------------------------ prewedding Closing ---------------------------------------
-
 
 
 // ------------------------------------------ trailer Opening ---------------------------------------
@@ -418,7 +424,7 @@ exports.createfashion = catchAsyncError(async (req, res, next) => {
         modelname,
      });
 
-     if (!req.files['posterimage'] || req.files['images'].length === 0) {
+     if (!req.files['posterimage'] || !req.files['images'] || req.files['images'].length === 0) {
          return res.status(400).json({ message: 'At least one image is required' });
      }
 
@@ -498,8 +504,5 @@ exports.findsingleevent = catchAsyncError(async (req,res,next) =>{
         res.status(500).json({ error: 'Internal Server Error' });
     }
 })
-
-
-
 
 // ------------------------------------------ event Closing ---------------------------------------

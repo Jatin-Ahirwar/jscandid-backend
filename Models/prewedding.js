@@ -6,10 +6,16 @@ const preweddingModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    posterimage:String,
-    preweddingimages:[{
+    posterimage:{
         type:String,
-        required:[true, "prewedding images is required"],
+        required:[true, "posterimage required"]
+    },
+    teaser:{
+        type:String,
+    },
+    images:[{
+        type:String,
+        required:[true, "images required"],
     }],
     bridename:{
         type:String,
@@ -23,7 +29,7 @@ const preweddingModel = new mongoose.Schema({
         maxlength:[13,"groomname should not exceed more than 15 character"],
         minlength:[2,"groomname should have atleast 6 characters"]
     },
-    Date:{
+    date:{
         type:String,
         required:[true,"date is required"],
     },
