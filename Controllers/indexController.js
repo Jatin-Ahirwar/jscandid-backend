@@ -3,6 +3,7 @@ const { sendtoken } = require("../utils/SendToken.js");
 const userModel = require("../Models/userModel.js");
 const ErrorHandler = require("../utils/ErrorHandler.js");
 const storiesModel = require("../Models/stories.js")
+const storiesFunctionModel = require("../Models/storiesfunction.js")
 const imagesModel = require("../Models/images.js")
 const preweddingModel = require("../Models/prewedding.js")
 const trailerModel = require("../Models/trailer.js")
@@ -79,37 +80,98 @@ exports.adminsignout = catchAsyncError(async (req,res,next) =>{
 // ------------------------------------------Stories Opening ---------------------------------------
 
 exports.createstories = catchAsyncError(async (req,res,next) =>{
-    try {
-        const user = await userModel.findById(req.id).exec()
-        const stories = await new storiesModel(req.body).save()
-        stories.user = user._id
-        user.stories.push(stories._id)
-        await stories.save()
-        await user.save()
-        res.status(201).json({success:true , stories})
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    const user = await userModel.findById(req.id).exec()
+    const { bridename , groomname , date , title , location , venue  } = req.body
+
+    const posterimage = req.files && req.files['posterimage'] && req.files['posterimage'][0] && req.files['posterimage'][0].filename;
+    const teaser = req.files && req.files['teaser'] && req.files['teaser'][0] && req.files['teaser'][0].filename;
+
+    const newstories = new storiesModel({
+        posterimage,
+        teaser,
+        bridename,
+        groomname,
+        date,
+        title,
+        location,
+        venue,
+    });
+    
+    newstories.user = user._id
+    user.stories.push(newstories._id)
+    await newstories.save()
+    await user.save()
+    res.status(201).json({success:true , newstories})
 })
 
+exports.createstoriesfunction = catchAsyncError(async (req,res,next) =>{
+    const stories = await storiesModel.findById(req.params.id).exec()
+    const { functionname } = req.body
+
+    if(!req.files || req.files.length === 0){
+        return res.status(404).json({success:true , message: "files not found"})
+    }
+
+    const filenames = []
+    req.files.forEach((file)=>{
+        filenames.push(file.filename)
+    })
+
+    const newstoriesfunction = new storiesFunctionModel({
+        functionname,
+        images : filenames
+    });
+    
+    newstoriesfunction.stories = stories._id
+    stories.storiesfunction.push(newstoriesfunction._id)
+    await newstoriesfunction.save()
+    await stories.save()
+    res.status(201).json({success:true , newstoriesfunction})
+})
+
+// exports.createstories = catchAsyncError(async (req,res,next) =>{
+//     const user = await userModel.findById(req.id).exec()
+//     const { bridename , groomname , date , title , location , venue  } = req.body
+
+//     // const posterimage = req.files && req.files['posterimage'] && req.files['posterimage'][0] && req.files['posterimage'][0].filename;
+//     // const teaser = req.files && req.files['teaser'] && req.files['teaser'][0] && req.files['teaser'][0].filename;
+
+//     const newstories = new storiesModel({
+//         bridename,
+//         groomname,
+//         date,
+//         title,
+//         location,
+//         venue,
+//     });
+
+//     if (!req.body.storiesfunction || req.body.storiesfunction.length === 0) {
+//         return res.status(400).json({ message: 'At least one storiesfunction is required' });
+//     }
+
+//     newstories.posterimage =  req.files && req.files['posterimage'] && req.files['posterimage'][0] && req.files['posterimage'][0].filename;
+//     newstories.teaser =  req.files && req.files['teaser'] && req.files['teaser'][0] && req.files['teaser'][0].filename;
+
+//     newstories.storiesfunction = req.body.storiesfunction.map(story => ({
+//         functionname: story.functionname,
+//         images: story.images.map(image => image.filename), 
+//     }));
+    
+//     newstories.user = user._id
+//     user.stories.push(newstories._id)
+//     await newstories.save()
+//     await user.save()
+//     res.status(201).json({success:true , newstories})
+// })
 
 exports.findallstories = catchAsyncError(async (req,res,next) =>{
-    try {
         const allstories = await storiesModel.find().exec()
         res.status(201).json({success:true , allstories })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
 })
 
-
 exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
-    try {
         const singlestorie = await storiesModel.findById(req.params.id).exec()
         res.status(201).json({success:true , singlestorie })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
 })
 
 // ------------------------------------------ Stories Closing ---------------------------------------

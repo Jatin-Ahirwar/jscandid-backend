@@ -33,6 +33,7 @@ const {
     findsingleevent,
     deletesingleimages,
     updatesinglefashion,
+    createstoriesfunction,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -59,13 +60,18 @@ router.get("/signout", isAuthenticated ,adminsignout)
 // ------------------------------------------ Stories Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createStories",isAuthenticated ,createstories)
+router.post("/createStories",isAuthenticated ,upload.fields([
+    {name: "posterimage" , maxCount: 1},
+    {name: "teaser" , maxCount: 1},
+])  ,createstories)
+
+router.post("/createStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,createstoriesfunction)
 
 // Post /findallstories
 router.post("/findallstories" ,findallstories)
 
 // Post /findsinglestories
-router.post("/findsinglestories" ,findsinglestories)
+router.post("/findsinglestories/:id" ,findsinglestories)
 
 
 // ------------------------------------------ Stories Closing ---------------------------------------
