@@ -25,12 +25,11 @@ const storage = multer.diskStorage({
       const fn = nd.getTime() + Math.floor(Math.random()*1000000) + path.extname(file.originalname)
       cb(null, file.fieldname + fn)
     }
-  })
+})
   
 exports.upload = multer({ storage: storage })
 const upload = multer({ storage: storage })
     
-
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
     res.json({message:"secure"}); 
@@ -38,7 +37,12 @@ exports.homepage = catchAsyncError(async (req,res,next)=>{
 
 exports.admin = catchAsyncError(async (req,res,next)=>{
     const admin = await userModel.findById(req.id)
-    .populate("stories")
+    .populate({
+        path : 'stories',
+        populate : {
+          path : 'storiesfunction'
+        }
+    })
     .populate("images")
     .populate("prewedding")
     .populate("trailer")
@@ -128,41 +132,6 @@ exports.createstoriesfunction = catchAsyncError(async (req,res,next) =>{
     await stories.save()
     res.status(201).json({success:true , newstoriesfunction})
 })
-
-// exports.createstories = catchAsyncError(async (req,res,next) =>{
-//     const user = await userModel.findById(req.id).exec()
-//     const { bridename , groomname , date , title , location , venue  } = req.body
-
-//     // const posterimage = req.files && req.files['posterimage'] && req.files['posterimage'][0] && req.files['posterimage'][0].filename;
-//     // const teaser = req.files && req.files['teaser'] && req.files['teaser'][0] && req.files['teaser'][0].filename;
-
-//     const newstories = new storiesModel({
-//         bridename,
-//         groomname,
-//         date,
-//         title,
-//         location,
-//         venue,
-//     });
-
-//     if (!req.body.storiesfunction || req.body.storiesfunction.length === 0) {
-//         return res.status(400).json({ message: 'At least one storiesfunction is required' });
-//     }
-
-//     newstories.posterimage =  req.files && req.files['posterimage'] && req.files['posterimage'][0] && req.files['posterimage'][0].filename;
-//     newstories.teaser =  req.files && req.files['teaser'] && req.files['teaser'][0] && req.files['teaser'][0].filename;
-
-//     newstories.storiesfunction = req.body.storiesfunction.map(story => ({
-//         functionname: story.functionname,
-//         images: story.images.map(image => image.filename), 
-//     }));
-    
-//     newstories.user = user._id
-//     user.stories.push(newstories._id)
-//     await newstories.save()
-//     await user.save()
-//     res.status(201).json({success:true , newstories})
-// })
 
 exports.findallstories = catchAsyncError(async (req,res,next) =>{
         const allstories = await storiesModel.find().exec()
@@ -296,7 +265,6 @@ exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
         const singleimage = await preweddingModel.findById(req.params.id).exec()
         res.status(201).json({success:true , singleimage })
 })
-
 
 // ------------------------------------------ prewedding Closing ---------------------------------------
 
@@ -475,12 +443,12 @@ exports.findsinglematernity = catchAsyncError(async (req,res,next) =>{
 // ------------------------------------------ maternity Closing ---------------------------------------
 
 
+
 // ------------------------------------------ fashion Opening ---------------------------------------
 
 exports.createfashion = catchAsyncError(async (req, res, next) => {
     const user = await userModel.findById(req.id).exec()
     const { modelname } = req.body;
-
 
     const newFashion = new fashionModel({
         modelname,
