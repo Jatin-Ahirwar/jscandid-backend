@@ -34,6 +34,8 @@ const {
     deletesingleimages,
     updatesinglefashion,
     createstoriesfunction,
+    updatestoriesfunction,
+    updateprewedding,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -66,6 +68,9 @@ router.post("/createStories",isAuthenticated ,upload.fields([
 ])  ,createstories)
 
 router.post("/createStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,createstoriesfunction)
+
+// router.post("/stories/:id1/updateStoriesfunction/:id2",isAuthenticated ,upload.array("images")  ,updatestoriesfunction)
+router.post("/updateStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,updatestoriesfunction)
 
 // Post /findallstories
 router.post("/findallstories" ,findallstories)
@@ -103,6 +108,12 @@ router.post("/createprewedding", isAuthenticated, upload.fields([
     {name:"teaser" , maxCount: 1},
     {name:"images" , maxCount: 20}
 ])  ,createprewedding)
+
+router.post("/updateprewedding/:id", isAuthenticated, upload.fields([
+    {name:"posterimage" , maxCount: 1},
+    {name:"teaser" , maxCount: 1},
+    {name:"images" , maxCount: 20}
+])  ,updateprewedding)
 
 // Post /findallprewedding
 router.post("/findallprewedding" ,findallprewedding)

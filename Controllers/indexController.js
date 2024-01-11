@@ -133,6 +133,26 @@ exports.createstoriesfunction = catchAsyncError(async (req,res,next) =>{
     res.status(201).json({success:true , newstoriesfunction})
 })
 
+exports.updatestoriesfunction = catchAsyncError(async (req,res,next) =>{
+    const existingfunction = await storiesFunctionModel.findById(req.params.id).exec()
+    const { functionname } = req.body
+    
+    if (!existingfunction) {
+        return res.status(404).json({ message: 'Function not found' });
+    }
+
+    const filenames = []
+    req.files.forEach((file)=>{
+        filenames.push(file.filename)
+    })
+
+    existingfunction.functionname = functionname;
+    existingfunction.images = existingfunction.images.concat(filenames)
+
+    await existingfunction.save()
+    res.status(201).json({success:true , existingfunction})
+})
+
 exports.findallstories = catchAsyncError(async (req,res,next) =>{
         const allstories = await storiesModel.find().exec()
         res.status(201).json({success:true , allstories })
@@ -254,6 +274,35 @@ exports.createprewedding = catchAsyncError(async (req,res,next) =>{
         await user.save()
         res.status(201).json({success:true , newPrewedding})
     
+})
+
+exports.updateprewedding = catchAsyncError(async (req,res,next) =>{
+    const existingprewedding = await preweddingModel.findById(req.params.id).exec()
+    const { bridename , groomname , date ,country , location , } = req.body
+
+    existingprewedding.bridename = bridename || existingprewedding.bridename
+    existingprewedding.groomname = groomname || existingprewedding.groomname
+    existingprewedding.date = date || existingprewedding.date
+    existingprewedding.country = country || existingprewedding.country
+    existingprewedding.location = location || existingprewedding.location
+
+
+    if (req.files['images'] && req.files['images'].length > 0) {
+        const newImages = req.files['images'].map(file => file.filename);
+        existingprewedding.images = existingprewedding.images.concat(newImages);
+    }
+
+    if (req.files['posterimage'] && req.files['posterimage'].length > 0) {
+        existingprewedding.posterimage = req.files['posterimage'][0].filename;
+    }
+
+    if (req.files['teaser'] && req.files['teaser'].length > 0) {
+        existingprewedding.teaser = req.files['teaser'][0].filename;
+    }
+
+    await existingprewedding.save()
+    res.status(201).json({success:true , existingprewedding})
+
 })
 
 exports.findallprewedding = catchAsyncError(async (req,res,next) =>{
