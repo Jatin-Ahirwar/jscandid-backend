@@ -36,6 +36,10 @@ const {
     createstoriesfunction,
     updatestoriesfunction,
     updateprewedding,
+    updatestories,
+    updatetrailer,
+    updatefashion,
+    updateevent,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -66,6 +70,11 @@ router.post("/createStories",isAuthenticated ,upload.fields([
     {name: "posterimage" , maxCount: 1},
     {name: "teaser" , maxCount: 1},
 ])  ,createstories)
+
+router.post("/updateStories/:id",isAuthenticated ,upload.fields([
+    {name: "posterimage" , maxCount: 1},
+    {name: "teaser" , maxCount: 1},
+])  ,updatestories)
 
 router.post("/createStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,createstoriesfunction)
 
@@ -133,6 +142,11 @@ router.post("/createtrailer", isAuthenticated , upload.fields([
     {name:"trailervideo" , maxCount: 1}
 ])  ,createtrailer)
 
+router.post("/updatetrailer/:id", isAuthenticated , upload.fields([
+    {name:"trailerposter" , maxCount: 1} , 
+    {name:"trailervideo" , maxCount: 1}
+])  ,updatetrailer)
+
 // Post /findalltrailer
 router.post("/findalltrailer" ,findalltrailer)
 
@@ -177,6 +191,11 @@ router.post("/createfashion", isAuthenticated, upload.fields([
     {name:"images" , maxCount: 20}
 ]) ,createfashion)
 
+router.post("/updatefashion/:id", isAuthenticated, upload.fields([
+    {name:"posterimage" , maxCount: 1},
+    {name:"images" , maxCount: 20}
+]) ,updatefashion)
+
 // Post /findallfashion
 router.post("/findallfashion" ,findallfashion)
 
@@ -196,6 +215,11 @@ router.post("/createevent", isAuthenticated, upload.fields([
     {name:"posterimage" , maxCount: 1},
     {name:"images" , maxCount: 20}
 ])  ,createevent)
+
+router.post("/updateevent/:id", isAuthenticated, upload.fields([
+    {name:"posterimage" , maxCount: 1},
+    {name:"images" , maxCount: 20}
+])  ,updateevent)
 
 // Post /findallevent
 router.post("/findallevent" ,findallevent)

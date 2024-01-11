@@ -108,6 +108,29 @@ exports.createstories = catchAsyncError(async (req,res,next) =>{
     res.status(201).json({success:true , newstories})
 })
 
+exports.updatestories = catchAsyncError(async (req,res,next) =>{
+    const existingstories = await storiesModel.findById(req.params.id).exec()
+    const { bridename , groomname , date , title , location , venue  } = req.body
+
+    existingstories.bridename = bridename || existingstories.bridename
+    existingstories.groomname = groomname || existingstories.groomname
+    existingstories.date = date || existingstories.date
+    existingstories.title = title || existingstories.title
+    existingstories.location = location || existingstories.location
+    existingstories.venue = venue || existingstories.venue
+
+    if(req.files["posterimage"] &&  req.files["posterimage"].length > 0){
+        existingstories.posterimage = req.files["posterimage"][0].filename
+    }
+
+    if(req.files["teaser"] &&  req.files["teaser"].length > 0){
+        existingstories.teaser = req.files["teaser"][0].filename
+    }
+    
+    await existingstories.save()
+    res.status(201).json({success:true , existingstories})
+})
+
 exports.createstoriesfunction = catchAsyncError(async (req,res,next) =>{
     const stories = await storiesModel.findById(req.params.id).exec()
     const { functionname } = req.body
@@ -353,6 +376,31 @@ exports.createtrailer = catchAsyncError(async (req,res,next)=>{
         res.status(201).json(savedTrailer);
 })
 
+exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
+    const existingtrailer = await trailerModel.findById(req.params.id).exec()
+
+        const { date, bridename, groomname, location, country } = req.body;
+
+        existingtrailer.date = date || existingtrailer.date
+        existingtrailer.bridename = bridename || existingtrailer.bridename
+        existingtrailer.groomname = groomname || existingtrailer.groomname
+        existingtrailer.location = location || existingtrailer.location
+        existingtrailer.country = country || existingtrailer.country
+
+
+        if(req.files['trailerposter'] && req.files['trailerposter'].length > 0){
+            existingtrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
+        }
+
+        if(req.files['trailervideo'] && req.files['trailervideo'].length > 0){
+            existingtrailer.trailervideo = req.files['trailervideo'][0].filename;
+        }
+
+        await existingtrailer.save();
+
+        res.status(201).json(existingtrailer);
+})
+
 exports.findalltrailer = catchAsyncError(async (req,res,next) =>{
     const alltrailers = await trailerModel.find().exec()
     res.json(alltrailers)
@@ -518,25 +566,37 @@ exports.createfashion = catchAsyncError(async (req, res, next) => {
      res.status(201).json(newFashion);
 })
 
+exports.updatefashion = catchAsyncError(async (req, res, next) => {
+    const existingfashion = await fashionModel.findById(req.params.id).exec()
+    const { modelname } = req.body;
+
+    existingfashion.modelname = modelname || existingfashion.modelname ;
+    
+    if(req.files['posterimage'] && req.files['posterimage'].length > 0){
+        existingfashion.posterimage = req.files['posterimage'][0].filename
+    }
+
+    if(req.files['images'] && req.files['images'].length > 0){
+       const newimages = req.files['images'].map(file => file.filename)
+       existingfashion.images = existingfashion.images.concat(newimages) 
+    }
+
+    await existingfashion.save();
+    res.status(201).json(existingfashion);
+})
+
 exports.findallfashion = catchAsyncError(async (req,res,next) =>{
     const allfashion = await fashionModel.find().exec()
     res.status(200).json({ success : true , allfashion})
 })
 
 exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
-    try {
         const singleimage = await fashionModel.findById(req.params.id).exec()
         res.status(201).json({success:true , singleimage })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
 })
 
 exports.updatesinglefashion = catchAsyncError(async (req,res,next) =>{
     const singleimage = await fashionModel.findById(req.params.id).exec()
-    
-    
-    
     res.status(201).json({success:true , singleimage })
 })
 
@@ -570,18 +630,34 @@ exports.createevent = catchAsyncError(async (req, res, next) => {
      res.status(201).json(newEvent);
 })
 
+exports.updateevent = catchAsyncError(async (req, res, next) => {
+    const existingevent = await eventModel.findById(req.params.id).exec()
+    const { modelname } = req.body;
+
+    existingevent.modelname = modelname || existingevent.modelname ;
+    
+    if(req.files['posterimage'] && req.files['posterimage'].length > 0){
+        existingevent.posterimage = req.files['posterimage'][0].filename
+    }
+
+    if (req.files['images'] && req.files['images'].length > 0) {
+        const newImages = req.files['images'].map(file => file.filename);
+        existingevent.images = existingevent.images.concat(newImages);
+    }
+
+    await existingevent.save();
+    res.status(201).json(existingevent);
+})
+
+
 exports.findallevent = catchAsyncError(async (req,res,next) =>{
     const allevent = await eventModel.find().exec()
     res.status(200).json({ success : true , allevent})
 })
 
 exports.findsingleevent = catchAsyncError(async (req,res,next) =>{
-    try {
         const singleevent = await eventModel.findById(req.params.id).exec()
         res.status(201).json({success:true , singleevent })
-    } catch (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
 })
 
 // ------------------------------------------ event Closing ---------------------------------------
