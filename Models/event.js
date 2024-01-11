@@ -12,7 +12,6 @@ const eventModel = new mongoose.Schema({
         required:[true, "event image is required"],
     }],
     modelname:{
-        unique: true,
         type:String,
         required:[true, " model name is required"],
         maxlength:[15,"model name can not exceed 15 characters"],

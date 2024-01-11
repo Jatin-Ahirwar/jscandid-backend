@@ -131,6 +131,33 @@ exports.updatestories = catchAsyncError(async (req,res,next) =>{
     res.status(201).json({success:true , existingstories})
 })
 
+exports.findallstories = catchAsyncError(async (req,res,next) =>{
+        const allstories = await storiesModel.find().exec()
+        res.status(201).json({success:true , allstories })
+})
+
+exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
+        const singlestorie = await storiesModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singlestorie })
+})
+
+exports.deletesinglestories = catchAsyncError(async (req,res,next) =>{
+    
+    const user = await userModel.findById(req.id).exec()
+    const singlestories = await storiesModel.findById(req.params.id).exec()
+
+    await storiesModel.deleteOne({ _id: singlestories._id})
+    const indexToRemove = user.stories.indexOf(singlestories._id);
+    
+    if (indexToRemove !== -1) {
+        user.stories.splice(indexToRemove, 1);
+        await user.save();
+    }
+
+    res.status(201).json({success:true , singlestories , user  })
+    
+})
+
 exports.createstoriesfunction = catchAsyncError(async (req,res,next) =>{
     const stories = await storiesModel.findById(req.params.id).exec()
     const { functionname } = req.body
@@ -176,14 +203,21 @@ exports.updatestoriesfunction = catchAsyncError(async (req,res,next) =>{
     res.status(201).json({success:true , existingfunction})
 })
 
-exports.findallstories = catchAsyncError(async (req,res,next) =>{
-        const allstories = await storiesModel.find().exec()
-        res.status(201).json({success:true , allstories })
-})
+exports.deletesingleStoriesfunction = catchAsyncError(async (req,res,next) =>{
 
-exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
-        const singlestorie = await storiesModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singlestorie })
+    const stories = await storiesModel.findById(req.params.id1).exec()
+    const storiesFunctionID = await storiesFunctionModel.findById(req.params.id2).exec()
+
+    await storiesFunctionModel.deleteOne({ _id : storiesFunctionID._id })
+    const indexToRemove = stories.storiesfunction.indexOf(storiesFunctionID._id)
+    
+    if (indexToRemove !== -1) {
+        stories.storiesfunction.splice(indexToRemove, 1);
+        await stories.save();
+    }
+    
+    res.status(201).json({success:true , stories, storiesFunctionID  })
+    
 })
 
 // ------------------------------------------ Stories Closing ---------------------------------------
@@ -250,18 +284,27 @@ exports.findsingleimages = catchAsyncError(async (req, res, next) => {
 });
 
 exports.deletesingleimages = catchAsyncError(async (req, res, next) => {
-    const imageIndex = req.params.index;
-    const imagesArray = await imagesModel.find().exec();
+    const userID = await userModel.findById(req.id).exec()
+    const imageIndex = req.params.imageIndex;
+    const existingImages = await imagesModel.findOne({ user: userID._id });
 
-    if (imagesArray) {
-      const singleImage = await imagesArray.images.splice(imageIndex,1);
-      await singleImage.save()
-      res.status(201).json({ success: true, imagesArray });
+    if (!existingImages) {
+        return res.status(404).json({ message: 'Prewedding not found' });
+    }
+
+    if (imageIndex < 0 || imageIndex >= existingImages.images.length) {
+        return res.status(400).json({ message: 'Invalid imageIndex' });
+    }
+
+    if (existingImages) {
+        const deletedImage = existingImages.images.splice(imageIndex, 1)[0];
+        // const singleImage = await imagesArray.images.splice(imageIndex,1)[0];
+        await existingImages.save()
+        res.status(201).json({ success: true, existingImages , deletedImage  });
     } else {
       res.status(404).json({ error: 'Image not found' });
     }
 });
-
 
 // ------------------------------------------ images Closing ---------------------------------------
 
@@ -337,6 +380,23 @@ exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
         const singleimage = await preweddingModel.findById(req.params.id).exec()
         res.status(201).json({success:true , singleimage })
 })
+
+exports.deletesingleprewedding = catchAsyncError(async (req,res,next) =>{
+    
+    const user = await userModel.findById(req.id).exec()
+    const singleprewedding = await preweddingModel.findById(req.params.id).exec()
+
+    await preweddingModel.deleteOne({ _id: singleprewedding._id})
+    const indexToRemove = user.prewedding.indexOf(singleprewedding._id);
+    
+    if (indexToRemove !== -1) {
+        user.prewedding.splice(indexToRemove, 1);
+        await user.save();
+    }
+    res.status(201).json({success:true , singleprewedding , user  })
+    
+})
+
 
 // ------------------------------------------ prewedding Closing ---------------------------------------
 
@@ -416,6 +476,22 @@ exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
     }
 })
 
+exports.deletesingletrailer = catchAsyncError(async (req,res,next) =>{
+    
+    const user = await userModel.findById(req.id).exec()
+    const singletrailer = await trailerModel.findById(req.params.id).exec()
+
+    await trailerModel.deleteOne({ _id: singletrailer._id})
+    const indexToRemove = user.trailer.indexOf(singletrailer._id);
+    
+    if (indexToRemove !== -1) {
+        user.trailer.splice(indexToRemove, 1);
+        await user.save();
+    }
+    res.status(201).json({success:true , singletrailer , user  })
+    
+})
+
 // ------------------------------------------ trailer Closing ---------------------------------------
 
 
@@ -478,6 +554,29 @@ exports.findsinglekids = catchAsyncError(async (req, res, next) => {
     }
 });
 
+exports.deletesinglekidsimages = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec()
+    const imageIndex = req.params.imageIndex;
+    const existingImages = await kidsModel.findOne({ user: userID._id });
+
+    if (!existingImages) {
+        return res.status(404).json({ message: 'Prewedding not found' });
+    }
+
+    if (imageIndex < 0 || imageIndex >= existingImages.images.length) {
+        return res.status(400).json({ message: 'Invalid imageIndex' });
+    }
+
+    if (existingImages) {
+        const deletedImage = existingImages.images.splice(imageIndex, 1)[0];
+        await existingImages.save()
+        res.status(201).json({ success: true, existingImages , deletedImage  });
+    } else {
+      res.status(404).json({ error: 'Image not found' });
+    }
+});
+
+
 // ------------------------------------------ kids Closing ---------------------------------------
 
 
@@ -537,6 +636,29 @@ exports.findsinglematernity = catchAsyncError(async (req,res,next) =>{
     }
 })
 
+exports.deletesinglematernityimages = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec()
+    const imageIndex = req.params.imageIndex;
+    const existingImages = await maternityModel.findOne({ user: userID._id });
+
+    if (!existingImages) {
+        return res.status(404).json({ message: 'Prewedding not found' });
+    }
+
+    if (imageIndex < 0 || imageIndex >= existingImages.images.length) {
+        return res.status(400).json({ message: 'Invalid imageIndex' });
+    }
+
+    if (existingImages) {
+        const deletedImage = existingImages.images.splice(imageIndex, 1)[0];
+        await existingImages.save()
+        res.status(201).json({ success: true, existingImages , deletedImage  });
+    } else {
+      res.status(404).json({ error: 'Image not found' });
+    }
+});
+
+
 // ------------------------------------------ maternity Closing ---------------------------------------
 
 
@@ -595,9 +717,20 @@ exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
         res.status(201).json({success:true , singleimage })
 })
 
-exports.updatesinglefashion = catchAsyncError(async (req,res,next) =>{
-    const singleimage = await fashionModel.findById(req.params.id).exec()
-    res.status(201).json({success:true , singleimage })
+exports.deletesinglefashion = catchAsyncError(async (req,res,next) =>{
+    
+    const user = await userModel.findById(req.id).exec()
+    const singlefashion = await fashionModel.findById(req.params.id).exec()
+
+    await fashionModel.deleteOne({ _id: singlefashion._id})
+    const indexToRemove = user.fashion.indexOf(singlefashion._id);
+    
+    if (indexToRemove !== -1) {
+        user.fashion.splice(indexToRemove, 1);
+        await user.save();
+    }
+    res.status(201).json({success:true , singlefashion , user  })
+    
 })
 
 // ------------------------------------------ fashion Closing ---------------------------------------
@@ -649,7 +782,6 @@ exports.updateevent = catchAsyncError(async (req, res, next) => {
     res.status(201).json(existingevent);
 })
 
-
 exports.findallevent = catchAsyncError(async (req,res,next) =>{
     const allevent = await eventModel.find().exec()
     res.status(200).json({ success : true , allevent})
@@ -658,6 +790,22 @@ exports.findallevent = catchAsyncError(async (req,res,next) =>{
 exports.findsingleevent = catchAsyncError(async (req,res,next) =>{
         const singleevent = await eventModel.findById(req.params.id).exec()
         res.status(201).json({success:true , singleevent })
+})
+
+exports.deletesingleevent = catchAsyncError(async (req,res,next) =>{
+    
+    const user = await userModel.findById(req.id).exec()
+    const singleevent = await eventModel.findById(req.params.id).exec()
+
+    await eventModel.deleteOne({ _id: singleevent._id})
+    const indexToRemove = user.event.indexOf(singleevent._id);
+    
+    if (indexToRemove !== -1) {
+        user.event.splice(indexToRemove, 1);
+        await user.save();
+    }
+    res.status(201).json({success:true , singleevent , user  })
+    
 })
 
 // ------------------------------------------ event Closing ---------------------------------------

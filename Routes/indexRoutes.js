@@ -40,6 +40,14 @@ const {
     updatetrailer,
     updatefashion,
     updateevent,
+    deletesinglekidsimages,
+    deletesinglematernityimages,
+    deletesinglefashion,
+    deletesingleevent,
+    deletesingletrailer,
+    deletesingleprewedding,
+    deletesinglestories,
+    deletesingleStoriesfunction,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -71,15 +79,12 @@ router.post("/createStories",isAuthenticated ,upload.fields([
     {name: "teaser" , maxCount: 1},
 ])  ,createstories)
 
+// Post /updateStories
 router.post("/updateStories/:id",isAuthenticated ,upload.fields([
     {name: "posterimage" , maxCount: 1},
     {name: "teaser" , maxCount: 1},
 ])  ,updatestories)
 
-router.post("/createStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,createstoriesfunction)
-
-// router.post("/stories/:id1/updateStoriesfunction/:id2",isAuthenticated ,upload.array("images")  ,updatestoriesfunction)
-router.post("/updateStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,updatestoriesfunction)
 
 // Post /findallstories
 router.post("/findallstories" ,findallstories)
@@ -87,6 +92,17 @@ router.post("/findallstories" ,findallstories)
 // Post /findsinglestories
 router.post("/findsinglestories/:id" ,findsinglestories)
 
+// Post /deletesinglestories
+router.post("/deletesinglestories/:id" , isAuthenticated ,deletesinglestories)
+
+// Post /createStoriesfunction
+router.post("/createStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,createstoriesfunction)
+
+// Post /updateStoriesfunction
+router.post("/updateStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,updatestoriesfunction)
+
+// Post /deletesingleStoriesfunction
+router.post("/deletesingleStoriesfunction/:id1/:id2" , isAuthenticated , deletesingleStoriesfunction)
 
 // ------------------------------------------ Stories Closing ---------------------------------------
 
@@ -103,7 +119,7 @@ router.post("/findallImages" ,findallimages)
 router.post("/findsingleImages/:index" ,findsingleimages)
 
 // Post /deletesingleImages
-router.post("/deletesingleImages/:index" , isAuthenticated , deletesingleimages)
+router.post("/deletesingleImages/:imageIndex" , isAuthenticated , deletesingleimages)
 
 
 // ------------------------------------------ Images Closing ---------------------------------------
@@ -130,6 +146,9 @@ router.post("/findallprewedding" ,findallprewedding)
 // Post /findsingleprewedding
 router.post("/findsingleprewedding/:id" ,findsingleprewedding)
 
+// Post /deletesingleprewedding
+router.post("/deletesingleprewedding/:id" , isAuthenticated ,deletesingleprewedding)
+
 // ------------------------------------------ prewedding Closing ---------------------------------------
 
 
@@ -153,6 +172,9 @@ router.post("/findalltrailer" ,findalltrailer)
 // Post /findsingletrailer
 router.post("/findsingletrailer/:id" ,findsingletrailer)
 
+// Post /deletesingletrailer
+router.post("/deletesingletrailer/:id" , isAuthenticated ,deletesingletrailer)
+
 // ------------------------------------------ trailer Closing ---------------------------------------
 
 
@@ -166,6 +188,9 @@ router.post("/findallkids" ,findallkids)
 
 // Post /findsinglekids
 router.post("/findsinglekids/:index" ,findsinglekids)
+
+// Post /deletesinglekidsimages
+router.post("/deletesinglekidsimages/:imageIndex", isAuthenticated ,deletesinglekidsimages)
 
 // ------------------------------------------ kids Closing ---------------------------------------
 
@@ -181,6 +206,9 @@ router.post("/findallmaternity" ,findallmaternity)
 // Post /findsinglematernity
 router.post("/findsinglematernity/:index" ,findsinglematernity)
 
+// Post /deletesinglematernityimages
+router.post("/deletesinglematernityimages/:imageIndex", isAuthenticated , deletesinglematernityimages)
+
 // ------------------------------------------ maternity Closing ---------------------------------------
 
 // ------------------------------------------ fashion Opening ---------------------------------------
@@ -191,6 +219,7 @@ router.post("/createfashion", isAuthenticated, upload.fields([
     {name:"images" , maxCount: 20}
 ]) ,createfashion)
 
+// Post /updateStories
 router.post("/updatefashion/:id", isAuthenticated, upload.fields([
     {name:"posterimage" , maxCount: 1},
     {name:"images" , maxCount: 20}
@@ -202,8 +231,8 @@ router.post("/findallfashion" ,findallfashion)
 // Post /findsinglefashion
 router.post("/findsinglefashion/:id" ,findsinglefashion)
 
-// Post /updatesinglefashion
-router.post("/updatesinglefashion/:id" ,updatesinglefashion)
+// Post /deletesinglefashion
+router.post("/deletesinglefashion/:id" , isAuthenticated ,deletesinglefashion)
 
 // ------------------------------------------ fashion Closing ---------------------------------------
 
@@ -216,6 +245,7 @@ router.post("/createevent", isAuthenticated, upload.fields([
     {name:"images" , maxCount: 20}
 ])  ,createevent)
 
+// Post /updateStories
 router.post("/updateevent/:id", isAuthenticated, upload.fields([
     {name:"posterimage" , maxCount: 1},
     {name:"images" , maxCount: 20}
@@ -227,6 +257,8 @@ router.post("/findallevent" ,findallevent)
 // Post /findsingleevent
 router.post("/findsingleevent/:id" ,findsingleevent)
 
+// Post /deletesingleevent
+router.post("/deletesingleevent/:id" , isAuthenticated ,deletesingleevent)
 // ------------------------------------------ event Closing ---------------------------------------
 
 
