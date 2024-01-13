@@ -32,7 +32,7 @@ const upload = multer({ storage: storage })
     
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
-    res.json({message:"secure"}); 
+    res.json({message:"home page"}); 
 })
 
 exports.admin = catchAsyncError(async (req,res,next)=>{
@@ -51,6 +51,7 @@ exports.admin = catchAsyncError(async (req,res,next)=>{
     .populate("fashion")
     .populate("event")
     res.json(admin)
+    console.log(admin)
 })
 
 // ------------------------------ Authentication & Authorization Opening ---------------------------------------
