@@ -138,7 +138,7 @@ exports.findallstories = catchAsyncError(async (req,res,next) =>{
 })
 
 exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
-        const singlestorie = await storiesModel.findById(req.params.id).exec()
+        const singlestorie = await storiesModel.findById(req.params.id).populate("storiesfunction").exec()
         res.status(201).json({success:true , singlestorie })
 })
 
@@ -378,8 +378,8 @@ exports.findallprewedding = catchAsyncError(async (req,res,next) =>{
 })
 
 exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
-        const singleimage = await preweddingModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singleimage })
+        const singleprewedding = await preweddingModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singleprewedding })
 })
 
 exports.deletesingleprewedding = catchAsyncError(async (req,res,next) =>{
@@ -469,8 +469,8 @@ exports.findalltrailer = catchAsyncError(async (req,res,next) =>{
 
 exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
     try {
-        const singleimage = await trailerModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singleimage })
+        const singletrailer = await trailerModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singletrailer })
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
         // console.log(error)
@@ -668,10 +668,10 @@ exports.deletesinglematernityimages = catchAsyncError(async (req, res, next) => 
 
 exports.createfashion = catchAsyncError(async (req, res, next) => {
     const user = await userModel.findById(req.id).exec()
-    const { modelname } = req.body;
+    const { modelname , location , country } = req.body;
 
     const newFashion = new fashionModel({
-        modelname,
+        modelname , location , country
      });
 
      if (!req.files['posterimage'] || !req.files['images'] || req.files['images'].length === 0) {
@@ -714,8 +714,8 @@ exports.findallfashion = catchAsyncError(async (req,res,next) =>{
 })
 
 exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
-        const singleimage = await fashionModel.findById(req.params.id).exec()
-        res.status(201).json({success:true , singleimage })
+        const singlefashion = await fashionModel.findById(req.params.id).exec()
+        res.status(201).json({success:true , singlefashion })
 })
 
 exports.deletesinglefashion = catchAsyncError(async (req,res,next) =>{
@@ -742,11 +742,11 @@ exports.deletesinglefashion = catchAsyncError(async (req,res,next) =>{
 
 exports.createevent = catchAsyncError(async (req, res, next) => {
     const user = await userModel.findById(req.id).exec()
-    const { modelname } = req.body;
+    const { modelname  , location , country } = req.body;
 
 
     const newEvent = new eventModel({
-        modelname,
+        modelname, location , country
      });
 
      if (!req.files['posterimage'] || req.files['images'].length === 0) {

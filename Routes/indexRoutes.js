@@ -85,7 +85,6 @@ router.post("/updateStories/:id",isAuthenticated ,upload.fields([
     {name: "teaser" , maxCount: 1},
 ])  ,updatestories)
 
-
 // Post /findallstories
 router.post("/findallstories" ,findallstories)
 
