@@ -109,7 +109,8 @@ router.post("/deletesingleStoriesfunction/:id1/:id2" , isAuthenticated , deletes
 // ------------------------------------------ Images Opening ---------------------------------------
 
 // Post /createMultipleImages
-router.post("/createImages", isAuthenticated , upload.array("images"), createimages);
+// router.post("/createImages", isAuthenticated , upload.array("images"), createimages);
+router.post("/createImages", isAuthenticated, createimages);
 
 // Post /findallImages
 router.post("/findallImages" ,findallimages)

@@ -11,6 +11,7 @@ const kidsModel = require("../Models/kids.js")
 const fashionModel = require("../Models/fashion.js")
 const eventModel = require("../Models/event.js")
 const maternityModel = require("../Models/maternity.js")
+const imagekit = require("../utils/imagekit.js").initImageKit()
 const multer = require("multer")
 const path = require("path")
 
@@ -28,6 +29,7 @@ const storage = multer.diskStorage({
 })
   
 exports.upload = multer({ storage: storage })
+
 const upload = multer({ storage: storage })
     
 
@@ -51,7 +53,7 @@ exports.admin = catchAsyncError(async (req,res,next)=>{
     .populate("fashion")
     .populate("event")
     res.json(admin)
-    console.log(admin)
+    // console.log(admin)
 })
 
 // ------------------------------ Authentication & Authorization Opening ---------------------------------------
@@ -62,6 +64,7 @@ exports.adminsignup = catchAsyncError(async (req,res,next)=>{
 })
 
 exports.adminsignin = catchAsyncError(async (req,res,next)=>{
+    
     const user = await userModel.findOne({email : req.body.email}).select("+password").exec()
     if(!user) {
             return next (new ErrorHandler("user not exist with this email. " , 404))
@@ -227,15 +230,52 @@ exports.deletesingleStoriesfunction = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ Images Opening ---------------------------------------
 
+// exports.createimages = catchAsyncError(async (req,res,next)=>{
+//         const userID = await userModel.findById(req.id).exec()
+
+//         if (!req.files || req.files.length === 0) {
+//             return res.status(400).json({ message: "No files provided" });
+//         }
+
+//         const filenames = [];
+//         req.files.forEach((file) => {
+//             filenames.push(file.filename);
+//         });
+
+//         const existingImages = await imagesModel.findOne({ user: userID._id });
+
+//         if(!existingImages){
+//             const newImages = new imagesModel({
+//                 images: filenames,
+//             });
+//             newImages.user = userID._id
+//             userID.images.push(newImages._id)
+//             await newImages.save();
+//             await userID.save();
+//             res.status(201).json({ message: true , newImages });    
+//         }
+//         else{
+//             existingImages.images = existingImages.images.concat(filenames)    
+//             await existingImages.save();
+//             res.status(201).json({ message: true , existingImages });
+//         }
+// })
+
+
 exports.createimages = catchAsyncError(async (req,res,next)=>{
         const userID = await userModel.findById(req.id).exec()
-
-        if (!req.files || req.files.length === 0) {
+        const files = req.files.images
+        
+        if (!files || files.length === 0) {
             return res.status(400).json({ message: "No files provided" });
         }
+        // if (!req.files.images || req.files.images.length === 0) {
+        //     return res.status(400).json({ message: "No files provided" });
+        // }
+        const modifiedfilename = `images-${Date.now()}${path.extname(files.name)}`
 
         const filenames = [];
-        req.files.forEach((file) => {
+        files.forEach((file) => {
             filenames.push(file.filename);
         });
 
@@ -255,8 +295,12 @@ exports.createimages = catchAsyncError(async (req,res,next)=>{
             existingImages.images = existingImages.images.concat(filenames)    
             await existingImages.save();
             res.status(201).json({ message: true , existingImages });
-
         }
+})
+
+
+exports.createimages = catchAsyncError(async (req,res,next)=>{
+    res.json({file:req.files.images})
 })
 
 exports.findallimages = catchAsyncError(async (req,res,next) =>{

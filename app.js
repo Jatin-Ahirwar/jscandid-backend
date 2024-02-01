@@ -37,7 +37,8 @@ app.use(session({
 app.use(cookieparser())
 
 // express file-upload
-// app.use(fileUpload())
+const fileupload = require("express-fileupload")
+app.use(fileupload())
 
 
 

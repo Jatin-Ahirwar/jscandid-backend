@@ -6,8 +6,12 @@ const imagesModel = new mongoose.Schema({
         ref:"user"
     },
     images:[{
-        type:String,
+        type:Object,
         required:[true, "image is required"],
+        default:{
+            fileId:"",
+            url:""
+        }
     }],
 },{timestamps:true})
 
