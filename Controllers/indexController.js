@@ -273,15 +273,14 @@ exports.createimages = catchAsyncError(async (req,res,next)=>{
         //     return res.status(400).json({ message: "No files provided" });
         // }
         const modifiedfilename = `images-${Date.now()}${path.extname(files.name)}`
-
-        const filenames = [];
-        files.forEach((file) => {
-            filenames.push(file.filename);
-        });
-
+        
         const existingImages = await imagesModel.findOne({ user: userID._id });
 
         if(!existingImages){
+            const { fileID , url } = new imagekit.upload({
+                file:files.data,
+                filename:modifiedfilename
+            })
             const newImages = new imagesModel({
                 images: filenames,
             });
