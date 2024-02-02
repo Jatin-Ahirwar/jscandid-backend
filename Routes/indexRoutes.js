@@ -48,6 +48,7 @@ const {
     deletesingleprewedding,
     deletesinglestories,
     deletesingleStoriesfunction,
+    createImages,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -110,7 +111,7 @@ router.post("/deletesingleStoriesfunction/:id1/:id2" , isAuthenticated , deletes
 
 // Post /createMultipleImages
 // router.post("/createImages", isAuthenticated , upload.array("images"), createimages);
-router.post("/createImages", isAuthenticated, createimages);
+router.post("/createImages", isAuthenticated, createImages);
 
 // Post /findallImages
 router.post("/findallImages" ,findallimages)
@@ -156,10 +157,13 @@ router.post("/deletesingleprewedding/:id" , isAuthenticated ,deletesingleprewedd
 
 // Post /createStories
 
-router.post("/createtrailer", isAuthenticated , upload.fields([
-    {name:"trailerposter" , maxCount: 1} , 
-    {name:"trailervideo" , maxCount: 1}
-])  ,createtrailer)
+// router.post("/createtrailer", isAuthenticated , upload.fields([
+//     {name:"trailerposter" , maxCount: 1} , 
+//     {name:"trailervideo" , maxCount: 1}
+// ])  ,createtrailer)
+
+router.post("/createtrailer", isAuthenticated  ,createtrailer)
+
 
 router.post("/updatetrailer/:id", isAuthenticated , upload.fields([
     {name:"trailerposter" , maxCount: 1} , 

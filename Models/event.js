@@ -6,9 +6,22 @@ const eventModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    posterimage:String,
+    posterimage:{
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
+        required:[true, "posterimage is required"],
+    },
     images:[{
-        type:String,
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
         required:[true, "event image is required"],
     }],
     modelname:{

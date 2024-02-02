@@ -262,45 +262,124 @@ exports.deletesingleStoriesfunction = catchAsyncError(async (req,res,next) =>{
 // })
 
 
-exports.createimages = catchAsyncError(async (req,res,next)=>{
-        const userID = await userModel.findById(req.id).exec()
-        const files = req.files.images
-        
-        if (!files || files.length === 0) {
-            return res.status(400).json({ message: "No files provided" });
-        }
-        // if (!req.files.images || req.files.images.length === 0) {
-        //     return res.status(400).json({ message: "No files provided" });
-        // }
-        const modifiedfilename = `images-${Date.now()}${path.extname(files.name)}`
-        
-        const existingImages = await imagesModel.findOne({ user: userID._id });
+// exports.createImages = catchAsyncError(async (req, res, next) => {
+//     const userID = await userModel.findById(req.id).exec();
+//     const files = req.files.images;
 
-        if(!existingImages){
-            const { fileID , url } = new imagekit.upload({
-                file:files.data,
-                filename:modifiedfilename
-            })
-            const newImages = new imagesModel({
-                images: filenames,
-            });
-            newImages.user = userID._id
-            userID.images.push(newImages._id)
-            await newImages.save();
-            await userID.save();
-            res.status(201).json({ message: true , newImages });    
-        }
-        else{
-            existingImages.images = existingImages.images.concat(filenames)    
-            await existingImages.save();
-            res.status(201).json({ message: true , existingImages });
-        }
-})
+//     if (!files || files.length === 0) {
+//         return res.status(400).json({ message: "No files provided" });
+//     }
+
+//     const modifiedfilename = `images-${Date.now()}${path.extname(files[0].originalname)}`;
+
+//     const existingImages = await imagesModel.findOne({ user: userID._id });
+
+//     if (!existingImages) {
+//         try {
+//             const { fileId, url } = await imagekit.upload({
+//                 file: files[0].buffer, // Assuming `files` is an array of file objects with a `buffer` property
+//                 fileName: modifiedfilename
+//             });
+
+//             const newImages = new imagesModel({
+//                 images: [{  url: url, fileId: fileId }]
+//                 // images: [{ name: modifiedfilename, url: url, fileId: fileId }]
+//             });
+
+//             newImages.user = userID._id;
+//             userID.images.push(newImages._id);
+
+//             await newImages.save();
+//             await userID.save();
+
+//             res.status(201).json({ message: true, newImages });
+//         } catch (error) {
+//             console.error("Error uploading image to ImageKit:", error);
+//             res.status(500).json({ message: "Error uploading image to ImageKit" });
+//         }
+//     } else {
+//         try {
+//             const { fileId, url } = await imagekit.upload({
+//                 file: files[0].buffer,
+//                 fileName: modifiedfilename
+//             });
+
+//             // existingImages.images.push({ name: modifiedfilename, url: url, fileId: fileId });
+//             existingImages.images.push({ url: url, fileId: fileId });
+//             await existingImages.save();
+
+//             res.status(201).json({ message: true, existingImages });
+//         } catch (error) {
+//             console.error("Error uploading image to ImageKit:", error);
+//             res.status(500).json({ message: "Error uploading image to ImageKit" });
+//         }
+//     }
+// });
+
+exports.createImages = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const files = req.files.images;
+
+    // res.json({userID,files})
+    if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files provided" });
+    }
+
+    const modifiedfilename = `images-${Date.now()}${path.extname(files.name)}`;
+
+    res.json(modifiedfilename)
+
+});
+
+    // const existingImages = await imagesModel.findOne({ user: userID._id });
+
+    // if (!existingImages) {
+    //     try {
+    //         const { fileId, url } = await imagekit.upload({
+    //             file: files[0].buffer, // Assuming `files` is an array of file objects with a `buffer` property
+    //             fileName: modifiedfilename
+    //         });
+
+    //         const newImages = new imagesModel({
+    //             images: [{  url: url, fileId: fileId }]
+    //             // images: [{ name: modifiedfilename, url: url, fileId: fileId }]
+    //         });
+
+    //         newImages.user = userID._id;
+    //         userID.images.push(newImages._id);
+
+    //         await newImages.save();
+    //         await userID.save();
+
+    //         res.status(201).json({ message: true, newImages });
+    //     } catch (error) {
+    //         console.error("Error uploading image to ImageKit:", error);
+    //         res.status(500).json({ message: "Error uploading image to ImageKit" });
+    //     }
+    // } else {
+    //     try {
+    //         const { fileId, url } = await imagekit.upload({
+    //             file: files[0].buffer,
+    //             fileName: modifiedfilename
+    //         });
+
+    //         // existingImages.images.push({ name: modifiedfilename, url: url, fileId: fileId });
+    //         existingImages.images.push({ url: url, fileId: fileId });
+    //         await existingImages.save();
+
+    //         res.status(201).json({ message: true, existingImages });
+    //     } catch (error) {
+    //         console.error("Error uploading image to ImageKit:", error);
+    //         res.status(500).json({ message: "Error uploading image to ImageKit" });
+    //     }
+    // }
+// });
 
 
-exports.createimages = catchAsyncError(async (req,res,next)=>{
-    res.json({file:req.files.images})
-})
+
+// exports.createimages = catchAsyncError(async (req,res,next)=>{
+//     res.json({file:req.files.images})
+// })
 
 exports.findallimages = catchAsyncError(async (req,res,next) =>{
     
@@ -447,38 +526,82 @@ exports.deletesingleprewedding = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ trailer Opening ---------------------------------------
 
+// exports.createtrailer = catchAsyncError(async (req,res,next)=>{
+//     const userID = await userModel.findById(req.id).exec()
+
+//     // Assuming you're sending other data in the request body
+//         const { date, bridename, groomname, location, country } = req.body;
+
+//         // Create a new trailer document
+//         const newTrailer = new trailerModel({
+//             date,
+//             bridename,
+//             groomname,
+//             location,
+//             country,
+//         });
+
+//         // Check if trailerposter and trailervideo files are present in the request
+//         if (!req.files['trailerposter'] || !req.files['trailervideo']) {
+//             return res.status(400).json({ message: 'Both trailerposter and trailervideo are required' });
+//         }
+
+//         // Save file paths or data to the newTrailer document
+//         newTrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
+//         newTrailer.trailervideo = req.files['trailervideo'][0].filename;
+
+//         // Save the new trailer document to the database
+//         newTrailer.user = userID._id
+//         userID.trailer.push(newTrailer._id)
+//         const savedTrailer = await newTrailer.save();
+//         await userID.save()
+
+//         res.status(201).json(savedTrailer);
+// })
+
+
+// exports.createtrailer = catchAsyncError(async (req,res,next)=>{
+//     const userID = await userModel.findById(req.id).exec()
+//     const trailer = req.files.trailer
+//     // Assuming you're sending other data in the request body
+//         const { date, bridename, groomname, location, country } = req.body;
+
+//         // Create a new trailer document
+//         const newTrailer = new trailerModel({
+//             date,
+//             bridename,
+//             groomname,
+//             location,
+//             country,
+//         });
+
+//         // Check if trailerposter and trailervideo files are present in the request
+//         if (!req.files['trailerposter'] || !req.files['trailervideo']) {
+//             return res.status(400).json({ message: 'Both trailerposter and trailervideo are required' });
+//         }
+
+//         // Save file paths or data to the newTrailer document
+//         newTrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
+//         newTrailer.trailervideo = req.files['trailervideo'][0].filename;
+
+//         // Save the new trailer document to the database
+//         newTrailer.user = userID._id
+//         userID.trailer.push(newTrailer._id)
+//         const savedTrailer = await newTrailer.save();
+//         await userID.save()
+
+//         res.status(201).json(savedTrailer);
+// })
+
 exports.createtrailer = catchAsyncError(async (req,res,next)=>{
     const userID = await userModel.findById(req.id).exec()
-
-    // Assuming you're sending other data in the request body
-        const { date, bridename, groomname, location, country } = req.body;
-
-        // Create a new trailer document
-        const newTrailer = new trailerModel({
-            date,
-            bridename,
-            groomname,
-            location,
-            country,
-        });
-
-        // Check if trailerposter and trailervideo files are present in the request
-        if (!req.files['trailerposter'] || !req.files['trailervideo']) {
-            return res.status(400).json({ message: 'Both trailerposter and trailervideo are required' });
-        }
-
-        // Save file paths or data to the newTrailer document
-        newTrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
-        newTrailer.trailervideo = req.files['trailervideo'][0].filename;
-
-        // Save the new trailer document to the database
-        newTrailer.user = userID._id
-        userID.trailer.push(newTrailer._id)
-        const savedTrailer = await newTrailer.save();
-        await userID.save()
-
-        res.status(201).json(savedTrailer);
+    const trailervideo = req.files.trailervideo
+    const trailerposter = req.files.trailerposter
+    // console.log({trailervideo,trailerposter})
+    res.json({trailervideo,trailerposter})
 })
+
+
 
 exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
     const existingtrailer = await trailerModel.findById(req.params.id).exec()

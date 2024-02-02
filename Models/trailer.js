@@ -5,10 +5,6 @@ const trailerModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    trailerposter:{
-        type:String,
-        required:[true,"trailerposter is required"],
-    },
     date:{
         type:String,
         require:[true,"Date is required"]
@@ -33,8 +29,22 @@ const trailerModel = new mongoose.Schema({
         maxlength:[15,"country can not exceed 15 characters"],
         minlength:[2,"country should contain minimum 2 characters"]
     },
+    trailerposter:{
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
+        required:[true,"trailerposter is required"],
+    },
     trailervideo:{
-        type:String,
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
         require:[true,"Video is required"]
     },
 })

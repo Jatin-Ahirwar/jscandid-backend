@@ -6,7 +6,12 @@ const maternityModel = new mongoose.Schema({
         ref:"user"
     },
     images:[{
-        type:String,
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
         required:[true, "image is required"],
     }],
 

@@ -7,14 +7,30 @@ const preweddingModel = new mongoose.Schema({
         ref:"user"
     },
     posterimage:{
-        type:String,
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
         required:[true, "posterimage required"]
     },
     teaser:{
-        type:String,
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
+        required:[true, "teaser required"]
     },
     images:[{
-        type:String,
+        type:Object,
+        default:{
+            fileId:"",
+            fileName:"",
+            url:""
+        },
         required:[true, "images required"],
     }],
     bridename:{
