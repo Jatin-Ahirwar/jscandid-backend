@@ -13,7 +13,8 @@ const eventModel = require("../Models/event.js")
 const maternityModel = require("../Models/maternity.js")
 const imagekit = require("../utils/imagekit.js").initImageKit()
 const multer = require("multer")
-const path = require("path")
+const path = require("path");
+const user = require("../Models/userModel.js");
 
 
 
@@ -261,128 +262,130 @@ exports.deletesingleStoriesfunction = catchAsyncError(async (req,res,next) =>{
 //         }
 // })
 
-
 // exports.createImages = catchAsyncError(async (req, res, next) => {
-//     const userID = await userModel.findById(req.id).exec();
+//     const userID = await userModel.findById(req.id).exec()
 //     const files = req.files.images;
 
-//     if (!files || files.length === 0) {
-//         return res.status(400).json({ message: "No files provided" });
+//     const uploadedFiles = [];
+
+//     files.forEach(async(file)=>{
+//         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+
+//         const { fileId, url } = await imagekit.upload({
+//             file: file.data,
+//             fileName: modifiedName
+//         });
+
+//         uploadedFiles.push({ fileId, url });
+
+//     })
+//     for (const file of files) {
+//         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+
+//         const { fileId, url } = await imagekit.upload({
+//             file: file.data,
+//             fileName: modifiedName
+//         });
+
+//         uploadedFiles.push({ fileId, url });
 //     }
 
-//     const modifiedfilename = `images-${Date.now()}${path.extname(files[0].originalname)}`;
+//     const imagesEntry = await imagesModel.findOne({ user: userID._id });
 
-//     const existingImages = await imagesModel.findOne({ user: userID._id });
+//     if (!imagesEntry) {
+//         const newImagesEntry = new imagesModel({
+//             user:userID._id,
+//             images: uploadedFiles
+//         });
 
-//     if (!existingImages) {
-//         try {
-//             const { fileId, url } = await imagekit.upload({
-//                 file: files[0].buffer, // Assuming `files` is an array of file objects with a `buffer` property
-//                 fileName: modifiedfilename
-//             });
+//         // newImagesEntry.user = userID._id
+//         userID.images.push(newImagesEntry._id)
+//         await newImagesEntry.save();
+//         // await userID.save();
 
-//             const newImages = new imagesModel({
-//                 images: [{  url: url, fileId: fileId }]
-//                 // images: [{ name: modifiedfilename, url: url, fileId: fileId }]
-//             });
+//         res.status(200).json({
+//             success: true,
+//             message: "Files uploaded successfully",
+//             imagesEntry: newImagesEntry,
+//         });
 
-//             newImages.user = userID._id;
-//             userID.images.push(newImages._id);
-
-//             await newImages.save();
-//             await userID.save();
-
-//             res.status(201).json({ message: true, newImages });
-//         } catch (error) {
-//             console.error("Error uploading image to ImageKit:", error);
-//             res.status(500).json({ message: "Error uploading image to ImageKit" });
-//         }
 //     } else {
-//         try {
-//             const { fileId, url } = await imagekit.upload({
-//                 file: files[0].buffer,
-//                 fileName: modifiedfilename
-//             });
-
-//             // existingImages.images.push({ name: modifiedfilename, url: url, fileId: fileId });
-//             existingImages.images.push({ url: url, fileId: fileId });
-//             await existingImages.save();
-
-//             res.status(201).json({ message: true, existingImages });
-//         } catch (error) {
-//             console.error("Error uploading image to ImageKit:", error);
-//             res.status(500).json({ message: "Error uploading image to ImageKit" });
-//         }
+//         imagesEntry.images = imagesEntry.images.concat(uploadedFiles);
+//         await imagesEntry.save();
+//         res.status(200).json({
+//             success: true,
+//             message: "Files uploaded successfully",
+//             imagesEntry,
+//         });
 //     }
 // });
 
 exports.createImages = catchAsyncError(async (req, res, next) => {
-    const userID = await userModel.findById(req.id).exec();
-    const files = req.files.images;
+    const userID = await userModel.findById(req.id).exec()
+    let files = req.files.images;
 
-    // res.json({userID,files})
-    if (!files || files.length === 0) {
-        return res.status(400).json({ message: "No files provided" });
+    const uploadedFiles = [];
+    const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+    if (!Array.isArray(files)) {
+        // If it's not an array, convert it to an array
+        files = [files];
     }
 
-    const modifiedfilename = `images-${Date.now()}${path.extname(files.name)}`;
+    for (const file of files) {
+        if(allowedFileTypes.includes(file.mimetype)){
 
-    res.json(modifiedfilename)
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
 
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName
+        });
+
+        uploadedFiles.push({ fileId, url , mimetype:file.mimetype });
+        }
+        else {
+            return res.status(400).json({
+                success: false,
+                message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+        }
+    }
+
+    // res.json(uploadedFiles)
+    const imagesEntry = await imagesModel.findOne({ user: userID._id });
+
+    if (!imagesEntry) {
+        // If not, create a new entry
+        const newImagesEntry = new imagesModel({
+            images: uploadedFiles,
+        });
+
+        newImagesEntry.user = userID._id
+        userID.images.push(newImagesEntry._id)
+        await newImagesEntry.save();
+        await userID.save()
+
+        res.status(200).json({
+            success: true,
+            message: "Files uploaded successfully",
+            imagesEntry: newImagesEntry,
+        });
+    } else {
+
+        imagesEntry.images = imagesEntry.images.concat(uploadedFiles);
+        await imagesEntry.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Files uploaded successfully",
+            imagesEntry,
+        });
+    }
 });
 
-    // const existingImages = await imagesModel.findOne({ user: userID._id });
-
-    // if (!existingImages) {
-    //     try {
-    //         const { fileId, url } = await imagekit.upload({
-    //             file: files[0].buffer, // Assuming `files` is an array of file objects with a `buffer` property
-    //             fileName: modifiedfilename
-    //         });
-
-    //         const newImages = new imagesModel({
-    //             images: [{  url: url, fileId: fileId }]
-    //             // images: [{ name: modifiedfilename, url: url, fileId: fileId }]
-    //         });
-
-    //         newImages.user = userID._id;
-    //         userID.images.push(newImages._id);
-
-    //         await newImages.save();
-    //         await userID.save();
-
-    //         res.status(201).json({ message: true, newImages });
-    //     } catch (error) {
-    //         console.error("Error uploading image to ImageKit:", error);
-    //         res.status(500).json({ message: "Error uploading image to ImageKit" });
-    //     }
-    // } else {
-    //     try {
-    //         const { fileId, url } = await imagekit.upload({
-    //             file: files[0].buffer,
-    //             fileName: modifiedfilename
-    //         });
-
-    //         // existingImages.images.push({ name: modifiedfilename, url: url, fileId: fileId });
-    //         existingImages.images.push({ url: url, fileId: fileId });
-    //         await existingImages.save();
-
-    //         res.status(201).json({ message: true, existingImages });
-    //     } catch (error) {
-    //         console.error("Error uploading image to ImageKit:", error);
-    //         res.status(500).json({ message: "Error uploading image to ImageKit" });
-    //     }
-    // }
-// });
-
-
-
-// exports.createimages = catchAsyncError(async (req,res,next)=>{
-//     res.json({file:req.files.images})
-// })
-
 exports.findallimages = catchAsyncError(async (req,res,next) =>{
-    
+
     const allImages = await imagesModel.find({}, 'images').exec();
 
     if (allImages && allImages.length > 0) {
@@ -597,7 +600,6 @@ exports.createtrailer = catchAsyncError(async (req,res,next)=>{
     const userID = await userModel.findById(req.id).exec()
     const trailervideo = req.files.trailervideo
     const trailerposter = req.files.trailerposter
-    // console.log({trailervideo,trailerposter})
     res.json({trailervideo,trailerposter})
 })
 
