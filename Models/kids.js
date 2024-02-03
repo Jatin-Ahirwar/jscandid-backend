@@ -5,14 +5,15 @@ const kidsModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    images:[{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
+    images: [{
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
         },
-        required:[true, "image is required"],
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
     }],
 },{timestamps:true})
 

@@ -5,14 +5,6 @@ const imagesModel = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
     },
-    // images:[{
-    //     type:Object,
-    //     required:[true, "image is required"],
-    //     default:{
-    //         fileId:"",
-    //         url:""
-    //     }
-    // }],
     images: [{
         fileId: {
             type: String,

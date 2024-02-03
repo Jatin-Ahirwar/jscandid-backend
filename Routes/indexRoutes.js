@@ -31,7 +31,6 @@ const {
     createevent,
     findallevent,
     findsingleevent,
-    deletesingleimages,
     updatesinglefashion,
     createstoriesfunction,
     updatestoriesfunction,
@@ -49,6 +48,7 @@ const {
     deletesinglestories,
     deletesingleStoriesfunction,
     createImages,
+    deletesingleimage,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -120,7 +120,7 @@ router.post("/findallImages" ,findallimages)
 router.post("/findsingleImages/:index" ,findsingleimages)
 
 // Post /deletesingleImages
-router.post("/deletesingleImages/:imageIndex" , isAuthenticated , deletesingleimages)
+router.post("/deletesingleImages/:imageIndex" , isAuthenticated , deletesingleimage)
 
 
 // ------------------------------------------ Images Closing ---------------------------------------
@@ -185,7 +185,8 @@ router.post("/deletesingletrailer/:id" , isAuthenticated ,deletesingletrailer)
 // ------------------------------------------ kids Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createkids", isAuthenticated , upload.array("images") ,createkids)
+// router.post("/createkids", isAuthenticated , upload.array("images") ,createkids)
+router.post("/createkids", isAuthenticated ,createkids)
 
 // Post /findallkids
 router.post("/findallkids" ,findallkids)

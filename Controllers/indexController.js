@@ -231,95 +231,6 @@ exports.deletesingleStoriesfunction = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ Images Opening ---------------------------------------
 
-// exports.createimages = catchAsyncError(async (req,res,next)=>{
-//         const userID = await userModel.findById(req.id).exec()
-
-//         if (!req.files || req.files.length === 0) {
-//             return res.status(400).json({ message: "No files provided" });
-//         }
-
-//         const filenames = [];
-//         req.files.forEach((file) => {
-//             filenames.push(file.filename);
-//         });
-
-//         const existingImages = await imagesModel.findOne({ user: userID._id });
-
-//         if(!existingImages){
-//             const newImages = new imagesModel({
-//                 images: filenames,
-//             });
-//             newImages.user = userID._id
-//             userID.images.push(newImages._id)
-//             await newImages.save();
-//             await userID.save();
-//             res.status(201).json({ message: true , newImages });    
-//         }
-//         else{
-//             existingImages.images = existingImages.images.concat(filenames)    
-//             await existingImages.save();
-//             res.status(201).json({ message: true , existingImages });
-//         }
-// })
-
-// exports.createImages = catchAsyncError(async (req, res, next) => {
-//     const userID = await userModel.findById(req.id).exec()
-//     const files = req.files.images;
-
-//     const uploadedFiles = [];
-
-//     files.forEach(async(file)=>{
-//         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-
-//         const { fileId, url } = await imagekit.upload({
-//             file: file.data,
-//             fileName: modifiedName
-//         });
-
-//         uploadedFiles.push({ fileId, url });
-
-//     })
-//     for (const file of files) {
-//         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-
-//         const { fileId, url } = await imagekit.upload({
-//             file: file.data,
-//             fileName: modifiedName
-//         });
-
-//         uploadedFiles.push({ fileId, url });
-//     }
-
-//     const imagesEntry = await imagesModel.findOne({ user: userID._id });
-
-//     if (!imagesEntry) {
-//         const newImagesEntry = new imagesModel({
-//             user:userID._id,
-//             images: uploadedFiles
-//         });
-
-//         // newImagesEntry.user = userID._id
-//         userID.images.push(newImagesEntry._id)
-//         await newImagesEntry.save();
-//         // await userID.save();
-
-//         res.status(200).json({
-//             success: true,
-//             message: "Files uploaded successfully",
-//             imagesEntry: newImagesEntry,
-//         });
-
-//     } else {
-//         imagesEntry.images = imagesEntry.images.concat(uploadedFiles);
-//         await imagesEntry.save();
-//         res.status(200).json({
-//             success: true,
-//             message: "Files uploaded successfully",
-//             imagesEntry,
-//         });
-//     }
-// });
-
 exports.createImages = catchAsyncError(async (req, res, next) => {
     const userID = await userModel.findById(req.id).exec()
     let files = req.files.images;
@@ -395,7 +306,7 @@ exports.findallimages = catchAsyncError(async (req,res,next) =>{
       res.status(404).json({ error: 'No images found' });
     }
 })
- 
+
 exports.findsingleimages = catchAsyncError(async (req, res, next) => {
     const imageIndex = req.params.index;
 
@@ -409,27 +320,51 @@ exports.findsingleimages = catchAsyncError(async (req, res, next) => {
     }
 });
 
-exports.deletesingleimages = catchAsyncError(async (req, res, next) => {
-    const userID = await userModel.findById(req.id).exec()
-    const imageIndex = req.params.imageIndex;
-    const existingImages = await imagesModel.findOne({ user: userID._id });
+exports.deletesingleimage = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const imagesEntry = await imagesModel.findOne({ user: userID._id });
 
-    if (!existingImages) {
-        return res.status(404).json({ message: 'Prewedding not found' });
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
     }
 
-    if (imageIndex < 0 || imageIndex >= existingImages.images.length) {
-        return res.status(400).json({ message: 'Invalid imageIndex' });
+    const index  = req.params.imageIndex;
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
     }
 
-    if (existingImages) {
-        const deletedImage = existingImages.images.splice(imageIndex, 1)[0];
-        // const singleImage = await imagesArray.images.splice(imageIndex,1)[0];
-        await existingImages.save()
-        res.status(201).json({ success: true, existingImages , deletedImage  });
-    } else {
-      res.status(404).json({ error: 'Image not found' });
+    const deletedImage = imagesEntry.images[index];
+
+    // Delete the image from ImageKit
+    try {
+        await imagekit.deleteFile(deletedImage.fileId);
+    } catch (error) {
+        console.error("Error deleting image from ImageKit:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete image from ImageKit.",
+        });
     }
+
+    // Remove the image from the local database
+    imagesEntry.images.splice(index, 1);
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image deleted successfully",
+        deletedImage,
+    });
 });
 
 // ------------------------------------------ images Closing ---------------------------------------
@@ -603,8 +538,6 @@ exports.createtrailer = catchAsyncError(async (req,res,next)=>{
     res.json({trailervideo,trailerposter})
 })
 
-
-
 exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
     const existingtrailer = await trailerModel.findById(req.params.id).exec()
 
@@ -667,36 +600,68 @@ exports.deletesingletrailer = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ kids Opening ---------------------------------------
 
-exports.createkids = catchAsyncError(async (req,res,next)=>{
-        const userID = await userModel.findById(req.id).exec()
+exports.createkids = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec()
+    const imagesEntry = await kidsModel.findOne({ user: userID._id });
+    let files = req.files.images;
 
-        if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ message: "No files provided" });
-        }
+    const uploadedFiles = [];
+    const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
 
-        const filenames = [];
-        req.files.forEach((file) => {
-            filenames.push(file.filename);
+    if (!Array.isArray(files)) {
+        // If it's not an array, convert it to an array
+        files = [files];
+    }
+
+    for (const file of files) {
+        if(allowedFileTypes.includes(file.mimetype)){
+
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName
         });
 
-        const existingImages = await kidsModel.findOne({ user: userID._id });
-
-        if(!existingImages){
-            const newImages = new kidsModel({
-                images: filenames,
+        uploadedFiles.push({ fileId, url , mimetype:file.mimetype });
+        }
+        else {
+            return res.status(400).json({
+                success: false,
+                message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
             });
-            newImages.user = userID._id
-            userID.kids.push(newImages._id)
-            await newImages.save();
-            await userID.save();
-            res.status(201).json({ message: true , newImages });    
         }
-        else{
-            existingImages.images = existingImages.images.concat(filenames)    
-            await existingImages.save();
-            res.status(201).json({ message: true , existingImages });
-        }
-})
+    }
+
+    // res.json(uploadedFiles)
+
+    if (!imagesEntry) {
+        // If not, create a new entry
+        const newImagesEntry = new kidsModel({
+            images: uploadedFiles,
+        });
+
+        newImagesEntry.user = userID._id
+        userID.images.push(newImagesEntry._id)
+        await newImagesEntry.save();
+        await userID.save()
+
+        res.status(200).json({
+            success: true,
+            message: "Files uploaded successfully",
+            imagesEntry: newImagesEntry,
+        });
+    } else {
+        imagesEntry.images = imagesEntry.images.concat(uploadedFiles);
+        await imagesEntry.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Files uploaded successfully",
+            imagesEntry,
+        });
+    }
+});
 
 exports.findallkids = catchAsyncError(async (req,res,next) =>{
     
@@ -724,27 +689,51 @@ exports.findsinglekids = catchAsyncError(async (req, res, next) => {
 });
 
 exports.deletesinglekidsimages = catchAsyncError(async (req, res, next) => {
-    const userID = await userModel.findById(req.id).exec()
-    const imageIndex = req.params.imageIndex;
-    const existingImages = await kidsModel.findOne({ user: userID._id });
+    const userID = await userModel.findById(req.id).exec();
+    const imagesEntry = await kidsModel.findOne({ user: userID._id });
 
-    if (!existingImages) {
-        return res.status(404).json({ message: 'Prewedding not found' });
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
     }
 
-    if (imageIndex < 0 || imageIndex >= existingImages.images.length) {
-        return res.status(400).json({ message: 'Invalid imageIndex' });
+    const index  = req.params.imageIndex;
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
     }
 
-    if (existingImages) {
-        const deletedImage = existingImages.images.splice(imageIndex, 1)[0];
-        await existingImages.save()
-        res.status(201).json({ success: true, existingImages , deletedImage  });
-    } else {
-      res.status(404).json({ error: 'Image not found' });
+    const deletedImage = imagesEntry.images[index];
+
+    // Delete the image from ImageKit
+    try {
+        await imagekit.deleteFile(deletedImage.fileId);
+    } catch (error) {
+        console.error("Error deleting image from ImageKit:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete image from ImageKit.",
+        });
     }
+
+    // Remove the image from the local database
+    imagesEntry.images.splice(index, 1);
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image deleted successfully",
+        deletedImage,
+    });
 });
-
 
 // ------------------------------------------ kids Closing ---------------------------------------
 
