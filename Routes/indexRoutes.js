@@ -110,7 +110,6 @@ router.post("/deletesingleStoriesfunction/:id1/:id2" , isAuthenticated , deletes
 // ------------------------------------------ Images Opening ---------------------------------------
 
 // Post /createMultipleImages
-// router.post("/createImages", isAuthenticated , upload.array("images"), createimages);
 router.post("/createImages", isAuthenticated, createImages);
 
 // Post /findallImages
@@ -121,7 +120,6 @@ router.post("/findsingleImages/:index" ,findsingleimages)
 
 // Post /deletesingleImages
 router.post("/deletesingleImages/:imageIndex" , isAuthenticated , deletesingleimage)
-
 
 // ------------------------------------------ Images Closing ---------------------------------------
 
@@ -157,13 +155,7 @@ router.post("/deletesingleprewedding/:id" , isAuthenticated ,deletesingleprewedd
 
 // Post /createStories
 
-// router.post("/createtrailer", isAuthenticated , upload.fields([
-//     {name:"trailerposter" , maxCount: 1} , 
-//     {name:"trailervideo" , maxCount: 1}
-// ])  ,createtrailer)
-
-router.post("/createtrailer", isAuthenticated  ,createtrailer)
-
+router.post("/createtrailer", isAuthenticated  , createtrailer)
 
 router.post("/updatetrailer/:id", isAuthenticated , upload.fields([
     {name:"trailerposter" , maxCount: 1} , 
@@ -185,7 +177,6 @@ router.post("/deletesingletrailer/:id" , isAuthenticated ,deletesingletrailer)
 // ------------------------------------------ kids Opening ---------------------------------------
 
 // Post /createStories
-// router.post("/createkids", isAuthenticated , upload.array("images") ,createkids)
 router.post("/createkids", isAuthenticated ,createkids)
 
 // Post /findallkids

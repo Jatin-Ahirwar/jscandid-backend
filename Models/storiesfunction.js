@@ -12,13 +12,14 @@ const storiesfunctionModel = new mongoose.Schema({
         minlength:[2,"function name should have atleast 6 characters"]    
     },
     images:[{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
         },
-        required:[true, "images is required"],
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
     }]    
 })
 

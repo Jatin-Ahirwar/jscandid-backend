@@ -21,31 +21,33 @@ const trailerModel = new mongoose.Schema({
     },
     location:{
         type:String,
-        maxlength:[15,"location can not exceed 15 characters"],
+        maxlength:[30,"location can not exceed 15 characters"],
         minlength:[2,"location should contain minimum 2 characters"]
     },
     country:{
         type:String,
-        maxlength:[15,"country can not exceed 15 characters"],
+        maxlength:[20,"country can not exceed 15 characters"],
         minlength:[2,"country should contain minimum 2 characters"]
     },
     trailerposter:{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
-        },
-        required:[true,"trailerposter is required"],
+            fileId: {
+                type: String,
+                required: [true, "File ID is required"]
+            },
+            url: {
+                type: String,
+                required: [true, "URL is required"]
+            }
     },
     trailervideo:{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
         },
-        require:[true,"Video is required"]
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
     },
 })
 

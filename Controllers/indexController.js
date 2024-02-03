@@ -464,79 +464,87 @@ exports.deletesingleprewedding = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------ trailer Opening ---------------------------------------
 
-// exports.createtrailer = catchAsyncError(async (req,res,next)=>{
-//     const userID = await userModel.findById(req.id).exec()
+exports.createtrailer = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    let { date, bridename, groomname, location, country } = req.body;
+    let trailerPoster = req.files.trailerposter;
+    let trailerVideo = req.files.trailervideo;
 
-//     // Assuming you're sending other data in the request body
-//         const { date, bridename, groomname, location, country } = req.body;
+    
+    const uploadedTrailerPoster = [];
+    const uploadedTrailerVideo = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+    const allowedVideoTypes = ['video/mp4'];
 
-//         // Create a new trailer document
-//         const newTrailer = new trailerModel({
-//             date,
-//             bridename,
-//             groomname,
-//             location,
-//             country,
-//         });
+    if (!Array.isArray(trailerPoster)) {
+        trailerPoster = [trailerPoster];
+    }
 
-//         // Check if trailerposter and trailervideo files are present in the request
-//         if (!req.files['trailerposter'] || !req.files['trailervideo']) {
-//             return res.status(400).json({ message: 'Both trailerposter and trailervideo are required' });
-//         }
+    for (const file of trailerPoster) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedTrailerPoster.push({ fileId, url });
+    }
 
-//         // Save file paths or data to the newTrailer document
-//         newTrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
-//         newTrailer.trailervideo = req.files['trailervideo'][0].filename;
+    if (!Array.isArray(trailerVideo)) {
+        // If it's not an array, convert it to an array
+        trailerVideo = [trailerVideo];
+    }
+    for (const file of trailerVideo) {
+        if (!allowedVideoTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+            message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+        });
+    }
+    
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+        
+        uploadedTrailerVideo.push({ fileId, url });
+    }
 
-//         // Save the new trailer document to the database
-//         newTrailer.user = userID._id
-//         userID.trailer.push(newTrailer._id)
-//         const savedTrailer = await newTrailer.save();
-//         await userID.save()
+        const newTrailer = new trailerModel({
+            date,
+            bridename,
+            groomname,
+            location,
+            country,
+            trailerposter: {
+                fileId: uploadedTrailerPoster[0].fileId,
+                url: uploadedTrailerPoster[0].url,
+            },
+            trailervideo: {
+                fileId: uploadedTrailerVideo[0].fileId,
+                url: uploadedTrailerVideo[0].url,
+            },
+            });
 
-//         res.status(201).json(savedTrailer);
-// })
+        newTrailer.user = userID._id
+        userID.trailer.push(newTrailer._id);
+        await newTrailer.save();
+        await userID.save();
 
-
-// exports.createtrailer = catchAsyncError(async (req,res,next)=>{
-//     const userID = await userModel.findById(req.id).exec()
-//     const trailer = req.files.trailer
-//     // Assuming you're sending other data in the request body
-//         const { date, bridename, groomname, location, country } = req.body;
-
-//         // Create a new trailer document
-//         const newTrailer = new trailerModel({
-//             date,
-//             bridename,
-//             groomname,
-//             location,
-//             country,
-//         });
-
-//         // Check if trailerposter and trailervideo files are present in the request
-//         if (!req.files['trailerposter'] || !req.files['trailervideo']) {
-//             return res.status(400).json({ message: 'Both trailerposter and trailervideo are required' });
-//         }
-
-//         // Save file paths or data to the newTrailer document
-//         newTrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
-//         newTrailer.trailervideo = req.files['trailervideo'][0].filename;
-
-//         // Save the new trailer document to the database
-//         newTrailer.user = userID._id
-//         userID.trailer.push(newTrailer._id)
-//         const savedTrailer = await newTrailer.save();
-//         await userID.save()
-
-//         res.status(201).json(savedTrailer);
-// })
-
-exports.createtrailer = catchAsyncError(async (req,res,next)=>{
-    const userID = await userModel.findById(req.id).exec()
-    const trailervideo = req.files.trailervideo
-    const trailerposter = req.files.trailerposter
-    res.json({trailervideo,trailerposter})
-})
+        res.status(200).json({
+            success: true,
+            message: "Trailer uploaded successfully",
+            trailer: newTrailer,
+        });
+});
 
 exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
     const existingtrailer = await trailerModel.findById(req.params.id).exec()
@@ -578,21 +586,60 @@ exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
     }
 })
 
-exports.deletesingletrailer = catchAsyncError(async (req,res,next) =>{
+// exports.deletesingletrailer = catchAsyncError(async (req,res,next) =>{
     
-    const user = await userModel.findById(req.id).exec()
-    const singletrailer = await trailerModel.findById(req.params.id).exec()
+//     const user = await userModel.findById(req.id).exec()
+//     const singletrailer = await trailerModel.findById(req.params.id).exec()
 
-    await trailerModel.deleteOne({ _id: singletrailer._id})
-    const indexToRemove = user.trailer.indexOf(singletrailer._id);
+//     await trailerModel.deleteOne({ _id: singletrailer._id})
+//     const indexToRemove = user.trailer.indexOf(singletrailer._id);
     
-    if (indexToRemove !== -1) {
-        user.trailer.splice(indexToRemove, 1);
-        await user.save();
+//     if (indexToRemove !== -1) {
+//         user.trailer.splice(indexToRemove, 1);
+//         await user.save();
+//     }
+//     res.status(201).json({success:true , singletrailer , user  })
+    
+// })
+
+exports.deletesingletrailer = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const trailerID = req.params.id;
+    
+    // Find the trailer by ID
+    const trailer = await trailerModel.findById(trailerID);
+    const trailerposter = trailer.trailerposter.fileId
+    const trailervideo = trailer.trailervideo.fileId
+
+    if (!trailer) {
+        return res.status(404).json({
+            success: false,
+            message: "Trailer not found",
+        });
     }
-    res.status(201).json({success:true , singletrailer , user  })
+
+    await Promise.all([
+        imagekit.deleteFile(trailerposter),
+        imagekit.deleteFile(trailervideo)
+    ])
+
+    // Update the user model to remove the trailer reference
+    await trailerModel.deleteOne({ _id: trailer._id})
     
-})
+
+    const index = userID.trailer.indexOf(trailerID);
+    if (index !== -1) {
+        userID.trailer.splice(index, 1);
+        await userID.save();
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Trailer deleted successfully",
+    });
+});
+
+
 
 // ------------------------------------------ trailer Closing ---------------------------------------
 
@@ -642,7 +689,7 @@ exports.createkids = catchAsyncError(async (req, res, next) => {
         });
 
         newImagesEntry.user = userID._id
-        userID.images.push(newImagesEntry._id)
+        userID.kids.push(newImagesEntry._id)
         await newImagesEntry.save();
         await userID.save()
 

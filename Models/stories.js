@@ -7,21 +7,24 @@ const storiesModel = new mongoose.Schema({
         ref:"user"
     },
     posterimage:{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
         },
-        required:[true,"posterimage is required"],
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
     },
     teaser:{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
         },
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
     },
     storiesfunction:[{
         type:mongoose.Schema.Types.ObjectId,

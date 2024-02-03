@@ -7,21 +7,24 @@ const fashionModel = new mongoose.Schema({
         ref:"user"
     },
     posterimage:{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
         },
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
     },
     images:[{
-        type:Object,
-        default:{
-            fileId:"",
-            fileName:"",
-            url:""
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
         },
-        required:[true, "image is required"]
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
     }],
     modelname:{
         type:String,
