@@ -546,10 +546,39 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
         });
 });
 
+// exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
+//     const existingtrailer = await trailerModel.findById(req.params.id).exec()
+
+//         const { date, bridename, groomname, location, country } = req.body;
+
+//         existingtrailer.date = date || existingtrailer.date
+//         existingtrailer.bridename = bridename || existingtrailer.bridename
+//         existingtrailer.groomname = groomname || existingtrailer.groomname
+//         existingtrailer.location = location || existingtrailer.location
+//         existingtrailer.country = country || existingtrailer.country
+
+
+//         if(req.files['trailerposter'] && req.files['trailerposter'].length > 0){
+//             existingtrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
+//         }
+
+//         if(req.files['trailervideo'] && req.files['trailervideo'].length > 0){
+//             existingtrailer.trailervideo = req.files['trailervideo'][0].filename;
+//         }
+
+//         await existingtrailer.save();
+
+//         res.status(201).json(existingtrailer);
+// })
+
 exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
     const existingtrailer = await trailerModel.findById(req.params.id).exec()
+    const previousTrailerPosterID = existingtrailer.trailerposter.fileId
+    const previousTrailerVideoID = existingtrailer.trailervideo.fileId
+    let newTrailerPoster = req.files?.trailerposter
+    let newTrailerVideo = req.files?.trailervideo
 
-        const { date, bridename, groomname, location, country } = req.body;
+    const { date, bridename, groomname, location, country } = req.body;
 
         existingtrailer.date = date || existingtrailer.date
         existingtrailer.bridename = bridename || existingtrailer.bridename
@@ -558,18 +587,82 @@ exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
         existingtrailer.country = country || existingtrailer.country
 
 
-        if(req.files['trailerposter'] && req.files['trailerposter'].length > 0){
-            existingtrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
+        const uploadedNewTrailerPoster = [];
+        const uploadedNewTrailerVideo = [];
+        const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+        const allowedVideoTypes = ['video/mp4'];
+    
+        if (!Array.isArray(newTrailerPoster)) {
+            newTrailerPoster = [newTrailerPoster];
+        }
+        
+        if(newTrailerPoster){
+            if(previousTrailerPosterID){
+                await imagekit.deleteFile(previousTrailerPosterID)
+            }
+            
+            for (const file of newTrailerPoster) {
+                if (!file || !file.mimetype || !allowedImageTypes.includes(file.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                            message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                    }
+                
+                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: file.data,
+                    fileName: modifiedName,
+                });
+            
+                uploadedNewTrailerPoster.push({ fileId, url });
+
+            }
         }
 
-        if(req.files['trailervideo'] && req.files['trailervideo'].length > 0){
-            existingtrailer.trailervideo = req.files['trailervideo'][0].filename;
+        if (!Array.isArray(newTrailerVideo)) {
+            // If it's not an array, convert it to an array
+            newTrailerVideo = [newTrailerVideo];
+        }
+    
+        if(newTrailerVideo){
+            if(previousTrailerVideoID){
+                await imagekit.deleteFile(previousTrailerVideoID)
+            }
+
+            for (const file of newTrailerVideo) {
+                if (!file || !file.mimetype || !allowedVideoTypes.includes(file.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                    message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+                });
+            }
+            
+                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: file.data,
+                    fileName: modifiedName,
+                });
+                
+                uploadedNewTrailerVideo.push({ fileId, url });
+            }
+        }
+
+        if(uploadedNewTrailerPoster.length > 0){
+            existingtrailer.trailerposter.fileId = uploadedNewTrailerPoster[0].fileId
+            existingtrailer.trailerposter.url = uploadedNewTrailerPoster[0].url
+        }
+
+        if(uploadedNewTrailerVideo.length > 0){
+            existingtrailer.trailervideo.fileId = uploadedNewTrailerVideo[0].fileId
+            existingtrailer.trailervideo.url = uploadedNewTrailerVideo[0].url
         }
 
         await existingtrailer.save();
 
         res.status(201).json(existingtrailer);
 })
+
 
 exports.findalltrailer = catchAsyncError(async (req,res,next) =>{
     const alltrailers = await trailerModel.find().exec()
@@ -585,22 +678,6 @@ exports.findsingletrailer = catchAsyncError(async (req,res,next) =>{
         // console.log(error)
     }
 })
-
-// exports.deletesingletrailer = catchAsyncError(async (req,res,next) =>{
-    
-//     const user = await userModel.findById(req.id).exec()
-//     const singletrailer = await trailerModel.findById(req.params.id).exec()
-
-//     await trailerModel.deleteOne({ _id: singletrailer._id})
-//     const indexToRemove = user.trailer.indexOf(singletrailer._id);
-    
-//     if (indexToRemove !== -1) {
-//         user.trailer.splice(indexToRemove, 1);
-//         await user.save();
-//     }
-//     res.status(201).json({success:true , singletrailer , user  })
-    
-// })
 
 exports.deletesingletrailer = catchAsyncError(async (req, res, next) => {
     const userID = await userModel.findById(req.id).exec();
@@ -638,7 +715,6 @@ exports.deletesingletrailer = catchAsyncError(async (req, res, next) => {
         message: "Trailer deleted successfully",
     });
 });
-
 
 
 // ------------------------------------------ trailer Closing ---------------------------------------
