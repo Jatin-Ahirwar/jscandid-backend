@@ -51,6 +51,8 @@ const {
     deletesingleimage,
     updatekids,
     updateImages,
+    deletesinglepreweddingimage,
+    updatesinglepreweddingimage,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -131,24 +133,24 @@ router.post("/deletesingleImages/:imageIndex" , isAuthenticated , deletesingleim
 
 // ------------------------------------------ prewedding Opening ---------------------------------------
 
-// Post /createStories
-router.post("/createprewedding", isAuthenticated, upload.fields([
-    {name:"posterimage" , maxCount: 1},
-    {name:"teaser" , maxCount: 1},
-    {name:"images" , maxCount: 20}
-])  ,createprewedding)
+// Post /createprewedding
+router.post("/createprewedding", isAuthenticated , createprewedding)
 
-router.post("/updateprewedding/:id", isAuthenticated, upload.fields([
-    {name:"posterimage" , maxCount: 1},
-    {name:"teaser" , maxCount: 1},
-    {name:"images" , maxCount: 20}
-])  ,updateprewedding)
+// Post /updateprewedding
+router.post("/updateprewedding/:id", isAuthenticated , updateprewedding)
+
+// Post /updatesinglepreweddingimage
+router.post("/updatesinglepreweddingimage/:id/:imageIndex" , isAuthenticated ,updatesinglepreweddingimage)
+
 
 // Post /findallprewedding
 router.post("/findallprewedding" ,findallprewedding)
 
 // Post /findsingleprewedding
 router.post("/findsingleprewedding/:id" ,findsingleprewedding)
+
+// Post /deletesingleprewedding
+router.post("/deletesinglepreweddingimage/:id/:imageIndex" , isAuthenticated ,deletesinglepreweddingimage)
 
 // Post /deletesingleprewedding
 router.post("/deletesingleprewedding/:id" , isAuthenticated ,deletesingleprewedding)

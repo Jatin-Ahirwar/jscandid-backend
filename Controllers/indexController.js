@@ -15,6 +15,7 @@ const imagekit = require("../utils/imagekit.js").initImageKit()
 const multer = require("multer")
 const path = require("path");
 const user = require("../Models/userModel.js");
+const prewedding = require("../Models/prewedding.js");
 
 
 
@@ -434,36 +435,117 @@ exports.deletesingleimage = catchAsyncError(async (req, res, next) => {
 
 // ------------------------------------------ prewedding Opening ---------------------------------------
 
-exports.createprewedding = catchAsyncError(async (req,res,next) =>{
-        const user = await userModel.findById(req.id).exec()
-        const { bridename , groomname , date ,country , location , } = req.body
+exports.createprewedding = catchAsyncError(async (req, res, next) => {
+    
+    const userID = await userModel.findById(req.id).exec();
+    const { bridename , groomname , date ,country , location } = req.body
+    let posterimage = req.files?.posterimage;
+    let teaser = req.files?.teaser;
+    let files = req.files?.images;
 
-        const posterimage = req.files['posterimage'][0].filename;
-        const teaser = req.files['teaser'][0].filename;
+    
+    const uploadedPosterImage = [];
+    const uploadedTeaser = [];
+    const uploadedFiles = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+    const allowedVideoTypes = ['video/mp4'];
 
-        const newPrewedding = new preweddingModel({
-            posterimage,
-            teaser,
-            bridename,
-            groomname,
-            date,
-            country,
-            location,
+    if (!Array.isArray(posterimage)) {
+        posterimage = [posterimage];
+    }
+
+    for (const file of posterimage) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedPosterImage.push({ fileId, url });
+    }
+
+    if (!Array.isArray(teaser)) {
+        // If it's not an array, convert it to an array
+        teaser = [teaser];
+    }
+    for (const file of teaser) {
+        if (!allowedVideoTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+            message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+        });
+    }
+    
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+        
+        uploadedTeaser.push({ fileId, url });
+    }
+
+    if (!Array.isArray(files)) {
+        // If it's not an array, convert it to an array
+        files = [files];
+    }
+
+    for (const file of files) {
+        if(!allowedImageTypes.includes(file.mimetype)){
+
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName
         });
 
-        if (!req.files['images'] || req.files['images'].length === 0) {
-            return res.status(400).json({ message: 'At least one image is required' });
+        uploadedFiles.push({ fileId, url  });
+    }
+        else {
+            return res.status(400).json({
+                success: false,
+                message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
         }
+    }
 
-        newPrewedding.images = req.files['images'].map(file => file.filename); // Assuming Multer renames the files and provides the filenames
-        
-        newPrewedding.user = user._id
-        user.prewedding.push(newPrewedding._id)
-        await newPrewedding.save()
-        await user.save()
-        res.status(201).json({success:true , newPrewedding})
-    
-})
+        const newPrewedding = new preweddingModel({
+            date,
+            bridename,
+            groomname,
+            location,
+            country,
+            posterimage: {
+                fileId: uploadedPosterImage[0].fileId,
+                url: uploadedPosterImage[0].url,
+            },
+            teaser: {
+                fileId: uploadedTeaser[0].fileId,
+                url: uploadedTeaser[0].url,
+            },
+            images: uploadedFiles,
+
+        });
+
+        newPrewedding.user = userID._id
+        userID.prewedding.push(newPrewedding._id);
+        await newPrewedding.save();
+        await userID.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Prewedding created successfully",
+            Prewedding: newPrewedding,
+        });
+});
 
 exports.updateprewedding = catchAsyncError(async (req,res,next) =>{
     const existingprewedding = await preweddingModel.findById(req.params.id).exec()
@@ -494,6 +576,236 @@ exports.updateprewedding = catchAsyncError(async (req,res,next) =>{
 
 })
 
+exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
+    const existingprewedding = await preweddingModel.findById(req.params.id).exec()
+    const previousPreweddingPosterID = existingprewedding.posterimage.fileId
+    const previousPreweddingVideoID = existingprewedding.teaser.fileId
+    let newpreweddingPoster = req.files?.posterimage
+    let newpreweddingVideo = req.files?.teaser
+
+    const { date, bridename, groomname, location, country } = req.body;
+
+        existingprewedding.date = date || existingprewedding.date
+        existingprewedding.bridename = bridename || existingprewedding.bridename
+        existingprewedding.groomname = groomname || existingprewedding.groomname
+        existingprewedding.location = location || existingprewedding.location
+        existingprewedding.country = country || existingprewedding.country
+
+        const uploadedNewpreweddingPosterImage = [];
+        const uploadedNewpreweddingTeaser = [];
+        const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+        const allowedVideoTypes = ['video/mp4'];
+            
+        // if (newpreweddingPoster && !Array.isArray(newpreweddingPoster)) {
+        //     console.log('File:', newpreweddingPoster); // Add this line for debugging
+        
+        //     if (!newpreweddingPoster || !newpreweddingPoster.mimetype || !allowedImageTypes.includes(newpreweddingPoster.mimetype)) {
+        //         console.log('Invalid file:', newpreweddingPoster); // Add this line for debugging
+        
+        //         return res.status(400).json({
+        //             success: false,
+        //             message: `File type ${newpreweddingPoster ? newpreweddingPoster.mimetype : 'undefined'} is not supported for preweddingposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+        //         });
+        //     }
+        // }
+
+        if (newpreweddingPoster && !Array.isArray(newpreweddingPoster)) {
+            if (!newpreweddingPoster || !newpreweddingPoster.mimetype || !allowedImageTypes.includes(newpreweddingPoster.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newpreweddingPoster ? newpreweddingPoster.mimetype : 'undefined'} is not supported for preweddingposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
+            }
+        
+            // Delete previous file before uploading new one
+            if (previousPreweddingPosterID.length > 0) {
+                await imagekit.deleteFile(previousPreweddingPosterID);
+            }
+        
+            // Handle the file upload for newpreweddingPoster
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(newpreweddingPoster.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newpreweddingPoster.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            uploadedNewpreweddingPosterImage.push({ fileId , url })
+        
+        }
+        
+        if (newpreweddingVideo && !Array.isArray(newpreweddingVideo)) {
+            if (!newpreweddingVideo || !newpreweddingVideo.mimetype || !allowedVideoTypes.includes(newpreweddingVideo.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newpreweddingVideo ? newpreweddingVideo.mimetype : 'undefined'} is not supported for preweddingvideo. Allowed video type: MP4`,
+                });
+            }
+        
+            // Delete previous file before uploading new one
+            if (previousPreweddingVideoID.length > 0) {
+                await imagekit.deleteFile(previousPreweddingVideoID);
+            }
+        
+            // Handle the file upload for newpreweddingVideo
+            const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(newpreweddingVideo.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newpreweddingVideo.data,
+                fileName: modifiedNameVideo,
+            });
+            
+            uploadedNewpreweddingTeaser.push({ fileId , url })
+        
+        }
+
+        if(uploadedNewpreweddingPosterImage.length > 0){
+            existingprewedding.posterimage.fileId = uploadedNewpreweddingPosterImage[0].fileId || uploadedNewpreweddingPosterImage[0].fileId
+            existingprewedding.posterimage.url = uploadedNewpreweddingPosterImage[0].fileId || uploadedNewpreweddingPosterImage[0].url
+        }
+        
+        if(uploadedNewpreweddingTeaser.length > 0){
+            existingprewedding.teaser.fileId = uploadedNewpreweddingTeaser[0].fileId || uploadedNewpreweddingTeaser[0].fileId
+            existingprewedding.teaser.url = uploadedNewpreweddingTeaser[0].url || uploadedNewpreweddingTeaser[0].url
+        }
+
+        await existingprewedding.save();
+        res.status(201).json(existingprewedding);
+})
+
+
+exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => {
+    const PreweddingID = req.params.id
+    const userID = await userModel.findById(req.id).exec();
+    const imagesEntry = await preweddingModel.findById(PreweddingID).exec();
+    let files = req.files.images
+    const index  = req.params.imageIndex;
+    const uploadedNewImages = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
+    }
+
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const updationImage = imagesEntry.images[index].fileId;
+
+    if (files && !Array.isArray(files)) {
+        if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+        }
+
+        // Delete previous file before uploading new one
+        if (updationImage.length > 0) {
+            await imagekit.deleteFile(updationImage);
+        }
+        
+        // Handle the file upload for files
+        const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: files.data,
+            fileName: modifiedNamePoster,
+        });
+        
+        imagesEntry.images[index] = { fileId , url }
+        // uploadedNewImages.push({ fileId , url })
+        // console.log(uploadedNewImages)
+    }
+    else{
+        for (const file of files) {
+            if(allowedImageTypes.includes(file.mimetype)){
+    
+            const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+    
+            const { fileId, url } = await imagekit.upload({
+                file: file.data,
+                fileName: modifiedName
+            });
+    
+            uploadedNewImages.push({ fileId , url })
+            imagesEntry.images = imagesEntry.images.concat(uploadedNewImages) || imagesEntry.images.concat(uploadedNewImages)
+            
+        }
+            else {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
+            }
+        }
+    }
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image successfully updated",
+        // deletedImage,
+    });
+});
+
+
+
+// exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => {
+//     const PreweddingID = req.params.id
+//     const userID = await userModel.findById(req.id).exec();
+//     const imagesEntry = await preweddingModel.findById(PreweddingID).exec();
+//     let files = req.files.images;
+
+//     if (!imagesEntry) {
+//         return res.status(404).json({
+//             success: false,
+//             message: "No images found for the user.",
+//         });
+//     }
+
+//     const index  = req.params.imageIndex;
+
+//     // Check if the index is valid
+//     if (index < 0 || index >= imagesEntry.images.length) {
+//         return res.status(400).json({
+//             success: false,
+//             message: "Invalid index provided.",
+//         });
+//     }
+
+//     const deletedImage = imagesEntry.images[index].fileId;
+
+//     console.log(index,deletedImage)
+//     // Delete the image from ImageKit
+//     if(files.length > 0) {
+//         await imagekit.deleteFile(deletedImage);
+//         for(const file  files)
+
+//     }
+
+//     // Remove the image from the local database
+//     imagesEntry.images.splice(index, 1);
+
+//     // Save the changes
+//     await imagesEntry.save();
+
+//     res.status(200).json({
+//         success: true,
+//         message: "Image deleted successfully",
+//         deletedImage
+//     });
+// });
+
 exports.findallprewedding = catchAsyncError(async (req,res,next) =>{
         const allprewedding = await preweddingModel.find().exec()
         res.status(201).json({success:true , allprewedding })
@@ -504,23 +816,91 @@ exports.findsingleprewedding = catchAsyncError(async (req,res,next) =>{
         res.status(201).json({success:true , singleprewedding })
 })
 
-exports.deletesingleprewedding = catchAsyncError(async (req,res,next) =>{
-    
-    const user = await userModel.findById(req.id).exec()
-    const singleprewedding = await preweddingModel.findById(req.params.id).exec()
+exports.deletesinglepreweddingimage = catchAsyncError(async (req, res, next) => {
+    const PreweddingID = req.params.id
+    const userID = await userModel.findById(req.id).exec();
+    const imagesEntry = await preweddingModel.findById(PreweddingID).exec();
 
-    await preweddingModel.deleteOne({ _id: singleprewedding._id})
-    const indexToRemove = user.prewedding.indexOf(singleprewedding._id);
-    
-    if (indexToRemove !== -1) {
-        user.prewedding.splice(indexToRemove, 1);
-        await user.save();
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
     }
-    res.status(201).json({success:true , singleprewedding , user  })
+
+    const index  = req.params.imageIndex;
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const deletedImage = imagesEntry.images[index].fileId;
+
+    // Delete the image from ImageKit
+    await imagekit.deleteFile(deletedImage);
+
+    // Remove the image from the local database
+    imagesEntry.images.splice(index, 1);
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image deleted successfully",
+        deletedImage
+    });
+});
+
+exports.deletesingleprewedding = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const PreweddingID = req.params.id;
     
-})
+    // Find the Prewedding by ID
+    const Prewedding = await preweddingModel.findById(PreweddingID);
+    const Preweddingposterimage = Prewedding.posterimage.fileId
+    const Preweddingteaser = Prewedding.teaser.fileId
+    const Preweddingimages = Prewedding.images
 
+    
+    if (!Prewedding) {
+        return res.status(404).json({
+            success: false,
+            message: "Prewedding not found",
+        });
+    }
+    if(prewedding){
+        await imagekit.deleteFile(Preweddingposterimage),
+        await imagekit.deleteFile(Preweddingteaser)
+        for (const image of Preweddingimages) {
+            await imagekit.deleteFile(image.fileId);
+        }    
+    }
+    // await Promise.all([
+    //     imagekit.deleteFile(Preweddingposterimage),
+    //     imagekit.deleteFile(Preweddingteaser)
+        
+    // ])
 
+    // Update the user model to remove the Prewedding reference
+    await preweddingModel.deleteOne({ _id: Prewedding._id})
+    
+
+    const index = userID.prewedding.indexOf(PreweddingID);
+    if (index !== -1) {
+        userID.prewedding.splice(index, 1);
+        await userID.save();
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Prewedding deleted successfully",
+    });
+});
 // ------------------------------------------ prewedding Closing ---------------------------------------
 
 
@@ -977,7 +1357,7 @@ exports.updatekids = catchAsyncError(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        message: "Image successfully updated",
+        message: "Image successfully u",
         // deletedImage,
     });
 });
