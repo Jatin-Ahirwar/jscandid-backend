@@ -295,6 +295,68 @@ exports.createImages = catchAsyncError(async (req, res, next) => {
     }
 });
 
+exports.updateImages = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const imagesEntry = await imagesModel.findOne({ user: userID._id });
+    let files = req.files.images
+    const index  = req.params.imageIndex;
+    const uploadedNewImages = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
+    }
+
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const deleteImage = imagesEntry.images[index].fileId;
+
+    if (files && !Array.isArray(files)) {
+        if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+        }
+
+        // Delete previous file before uploading new one
+        if (deleteImage.length > 0) {
+            await imagekit.deleteFile(deleteImage);
+        }
+        
+        // Handle the file upload for files
+        const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: files.data,
+            fileName: modifiedNamePoster,
+        });
+        
+        imagesEntry.images[index] = { fileId , url }
+        // uploadedNewImages.push({ fileId , url })
+        // console.log(uploadedNewImages)
+    }
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image successfully updated",
+        // deletedImage,
+    });
+});
+
 exports.findallimages = catchAsyncError(async (req,res,next) =>{
 
     const allImages = await imagesModel.find({}, 'images').exec();
@@ -855,6 +917,69 @@ exports.createkids = catchAsyncError(async (req, res, next) => {
             imagesEntry,
         });
     }
+});
+
+exports.updatekids = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const imagesEntry = await kidsModel.findOne({ user: userID._id });
+    let files = req.files.images
+    const index  = req.params.imageIndex;
+    const uploadedNewImages = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
+    }
+
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const deleteImage = imagesEntry.images[index].fileId;
+
+    if (files && !Array.isArray(files)) {
+        if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+        }
+
+        // Delete previous file before uploading new one
+        if (deleteImage.length > 0) {
+            await imagekit.deleteFile(deleteImage);
+        }
+        
+        // Handle the file upload for files
+        const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: files.data,
+            fileName: modifiedNamePoster,
+        });
+        
+        imagesEntry.images[index] = { fileId , url }
+        // uploadedNewImages.push({ fileId , url })
+        // console.log(uploadedNewImages)
+
+    }
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image successfully updated",
+        // deletedImage,
+    });
 });
 
 exports.findallkids = catchAsyncError(async (req,res,next) =>{
