@@ -548,26 +548,95 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
 
 // exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
 //     const existingtrailer = await trailerModel.findById(req.params.id).exec()
+//     const previousTrailerPosterID = existingtrailer.trailerposter.fileId
+//     const previousTrailerVideoID = existingtrailer.trailervideo.fileId
+//     let newTrailerPoster = req.files?.trailerposter
+//     let newTrailerVideo = req.files?.trailervideo
 
-//         const { date, bridename, groomname, location, country } = req.body;
+//     // console.log(previousTrailerPosterID,previousTrailerVideoID)
+//     console.log(newTrailerPoster,newTrailerVideo)
+    
+//     // const { date, bridename, groomname, location, country } = req.body;
 
-//         existingtrailer.date = date || existingtrailer.date
-//         existingtrailer.bridename = bridename || existingtrailer.bridename
-//         existingtrailer.groomname = groomname || existingtrailer.groomname
-//         existingtrailer.location = location || existingtrailer.location
-//         existingtrailer.country = country || existingtrailer.country
+//     //     existingtrailer.date = date || existingtrailer.date
+//     //     existingtrailer.bridename = bridename || existingtrailer.bridename
+//     //     existingtrailer.groomname = groomname || existingtrailer.groomname
+//     //     existingtrailer.location = location || existingtrailer.location
+//     //     existingtrailer.country = country || existingtrailer.country
 
 
-//         if(req.files['trailerposter'] && req.files['trailerposter'].length > 0){
-//             existingtrailer.trailerposter = req.files['trailerposter'][0].filename; // Assuming Multer renames the file and provides the filename
-//         }
+//         // const uploadedNewTrailerPoster = [];
+//         // const uploadedNewTrailerVideo = [];
+//         // const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+//         // const allowedVideoTypes = ['video/mp4'];
+    
+//         // if (!Array.isArray(newTrailerPoster)) {
+//         //     newTrailerPoster = [newTrailerPoster];
+//         // }
+        
+//         // if(newTrailerPoster.length > 0 ){
+//         //     if(previousTrailerPosterID.length > 0){
+//         //         await imagekit.deleteFile(previousTrailerPosterID)
+//         //     }
+            
+//         //     for (const file of newTrailerPoster) {
+//         //         if (!file || !file.mimetype || !allowedImageTypes.includes(file.mimetype)) {
+//         //             return res.status(400).json({
+//         //                 success: false,
+//         //                     // message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+//         //                     message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+//         //             });
+//         //             }
+                
+//         //         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+//         //         const { fileId, url } = await imagekit.upload({
+//         //             file: file.data,
+//         //             fileName: modifiedName,
+//         //         });
+            
+//         //         uploadedNewTrailerPoster.push({ fileId, url });
+//         //     }
+//         // }
 
-//         if(req.files['trailervideo'] && req.files['trailervideo'].length > 0){
-//             existingtrailer.trailervideo = req.files['trailervideo'][0].filename;
-//         }
+//         // if (!Array.isArray(newTrailerVideo)) {
+//         //     newTrailerVideo = [newTrailerVideo];
+//         // }
+        
+//         // if(newTrailerVideo.length > 0 ){
+//         //     if(previousTrailerVideoID.length > 0){
+//         //         await imagekit.deleteFile(previousTrailerVideoID)
+//         //     }
+            
+//         //     for (const file of newTrailerVideo) {
+//         //         if (!file || !file.mimetype || !allowedVideoTypes.includes(file.mimetype)) {
+//         //             return res.status(400).json({
+//         //                 success: false,
+//         //                     // message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+//         //                     message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+//         //             });
+//         //             }
+                
+//         //         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+//         //         const { fileId, url } = await imagekit.upload({
+//         //             file: file.data,
+//         //             fileName: modifiedName,
+//         //         });
+            
+//         //         uploadedNewTrailerVideo.push({ fileId, url });
+//         //     }
+//         // }
+
+//         // if(uploadedNewTrailerPoster.length > 0){
+//         //     existingtrailer.trailerposter.fileId = uploadedNewTrailerPoster[0].fileId || uploadedNewTrailerPoster[0].fileId
+//         //     existingtrailer.trailerposter.url = uploadedNewTrailerPoster[0].url || uploadedNewTrailerPoster[0].url
+//         // }
+
+//         // if(uploadedNewTrailerVideo.length > 0){
+//         //     existingtrailer.trailervideo.fileId = uploadedNewTrailerVideo[0].fileId || uploadedNewTrailerVideo[0].fileId
+//         //     existingtrailer.trailervideo.url = uploadedNewTrailerVideo[0].url || uploadedNewTrailerVideo[0].url
+//         // }
 
 //         await existingtrailer.save();
-
 //         res.status(201).json(existingtrailer);
 // })
 
@@ -586,83 +655,85 @@ exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
         existingtrailer.location = location || existingtrailer.location
         existingtrailer.country = country || existingtrailer.country
 
-
         const uploadedNewTrailerPoster = [];
         const uploadedNewTrailerVideo = [];
         const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
         const allowedVideoTypes = ['video/mp4'];
-    
-        if (!Array.isArray(newTrailerPoster)) {
-            newTrailerPoster = [newTrailerPoster];
+            
+        // if (newTrailerPoster && !Array.isArray(newTrailerPoster)) {
+        //     console.log('File:', newTrailerPoster); // Add this line for debugging
+        
+        //     if (!newTrailerPoster || !newTrailerPoster.mimetype || !allowedImageTypes.includes(newTrailerPoster.mimetype)) {
+        //         console.log('Invalid file:', newTrailerPoster); // Add this line for debugging
+        
+        //         return res.status(400).json({
+        //             success: false,
+        //             message: `File type ${newTrailerPoster ? newTrailerPoster.mimetype : 'undefined'} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+        //         });
+        //     }
+        // }
+
+        if (newTrailerPoster && !Array.isArray(newTrailerPoster)) {
+            if (!newTrailerPoster || !newTrailerPoster.mimetype || !allowedImageTypes.includes(newTrailerPoster.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newTrailerPoster ? newTrailerPoster.mimetype : 'undefined'} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
+            }
+        
+            // Delete previous file before uploading new one
+            if (previousTrailerPosterID.length > 0) {
+                await imagekit.deleteFile(previousTrailerPosterID);
+            }
+        
+            // Handle the file upload for newTrailerPoster
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(newTrailerPoster.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newTrailerPoster.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            uploadedNewTrailerPoster.push({ fileId , url })
+        
         }
         
-        if(newTrailerPoster){
-            if(previousTrailerPosterID){
-                await imagekit.deleteFile(previousTrailerPosterID)
-            }
-            
-            for (const file of newTrailerPoster) {
-                if (!file || !file.mimetype || !allowedImageTypes.includes(file.mimetype)) {
-                    return res.status(400).json({
-                        success: false,
-                            message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-                    });
-                    }
-                
-                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-                const { fileId, url } = await imagekit.upload({
-                    file: file.data,
-                    fileName: modifiedName,
-                });
-            
-                uploadedNewTrailerPoster.push({ fileId, url });
-
-            }
-        }
-
-        if (!Array.isArray(newTrailerVideo)) {
-            // If it's not an array, convert it to an array
-            newTrailerVideo = [newTrailerVideo];
-        }
-    
-        if(newTrailerVideo){
-            if(previousTrailerVideoID){
-                await imagekit.deleteFile(previousTrailerVideoID)
-            }
-
-            for (const file of newTrailerVideo) {
-                if (!file || !file.mimetype || !allowedVideoTypes.includes(file.mimetype)) {
-                    return res.status(400).json({
-                        success: false,
-                    message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+        if (newTrailerVideo && !Array.isArray(newTrailerVideo)) {
+            if (!newTrailerVideo || !newTrailerVideo.mimetype || !allowedVideoTypes.includes(newTrailerVideo.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newTrailerVideo ? newTrailerVideo.mimetype : 'undefined'} is not supported for trailervideo. Allowed video type: MP4`,
                 });
             }
-            
-                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-                const { fileId, url } = await imagekit.upload({
-                    file: file.data,
-                    fileName: modifiedName,
-                });
-                
-                uploadedNewTrailerVideo.push({ fileId, url });
+        
+            // Delete previous file before uploading new one
+            if (previousTrailerVideoID.length > 0) {
+                await imagekit.deleteFile(previousTrailerVideoID);
             }
+        
+            // Handle the file upload for newTrailerVideo
+            const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(newTrailerVideo.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newTrailerVideo.data,
+                fileName: modifiedNameVideo,
+            });
+            
+            uploadedNewTrailerVideo.push({ fileId , url })
+        
         }
 
         if(uploadedNewTrailerPoster.length > 0){
-            existingtrailer.trailerposter.fileId = uploadedNewTrailerPoster[0].fileId
-            existingtrailer.trailerposter.url = uploadedNewTrailerPoster[0].url
+            existingtrailer.trailerposter.fileId = uploadedNewTrailerPoster[0].fileId || uploadedNewTrailerPoster[0].fileId
+            existingtrailer.trailerposter.url = uploadedNewTrailerPoster[0].url || uploadedNewTrailerPoster[0].url
         }
 
         if(uploadedNewTrailerVideo.length > 0){
-            existingtrailer.trailervideo.fileId = uploadedNewTrailerVideo[0].fileId
-            existingtrailer.trailervideo.url = uploadedNewTrailerVideo[0].url
+            existingtrailer.trailervideo.fileId = uploadedNewTrailerVideo[0].fileId || uploadedNewTrailerVideo[0].fileId
+            existingtrailer.trailervideo.url = uploadedNewTrailerVideo[0].url || uploadedNewTrailerVideo[0].url
         }
 
         await existingtrailer.save();
-
         res.status(201).json(existingtrailer);
 })
-
 
 exports.findalltrailer = catchAsyncError(async (req,res,next) =>{
     const alltrailers = await trailerModel.find().exec()

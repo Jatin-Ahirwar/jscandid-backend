@@ -153,20 +153,11 @@ router.post("/deletesingleprewedding/:id" , isAuthenticated ,deletesingleprewedd
 
 // ------------------------------------------ trailer Opening ---------------------------------------
 
-// Post /createStories
-
+// Post /createtrailer
 router.post("/createtrailer", isAuthenticated  , createtrailer)
 
-
-// router.post("/updatetrailer/:id", isAuthenticated , upload.fields([
-//     {name:"trailerposter" , maxCount: 1} , 
-//     {name:"trailervideo" , maxCount: 1}
-// ])  ,updatetrailer)
-
-
-
+// Post /updatetrailer
 router.post("/updatetrailer/:id", isAuthenticated ,updatetrailer)
-
 
 // Post /findalltrailer
 router.post("/findalltrailer" ,findalltrailer)
