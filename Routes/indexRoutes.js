@@ -142,7 +142,6 @@ router.post("/updateprewedding/:id", isAuthenticated , updateprewedding)
 // Post /updatesinglepreweddingimage
 router.post("/updatesinglepreweddingimage/:id/:imageIndex" , isAuthenticated ,updatesinglepreweddingimage)
 
-
 // Post /findallprewedding
 router.post("/findallprewedding" ,findallprewedding)
 

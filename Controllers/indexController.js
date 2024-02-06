@@ -547,41 +547,13 @@ exports.createprewedding = catchAsyncError(async (req, res, next) => {
         });
 });
 
-exports.updateprewedding = catchAsyncError(async (req,res,next) =>{
-    const existingprewedding = await preweddingModel.findById(req.params.id).exec()
-    const { bridename , groomname , date ,country , location , } = req.body
-
-    existingprewedding.bridename = bridename || existingprewedding.bridename
-    existingprewedding.groomname = groomname || existingprewedding.groomname
-    existingprewedding.date = date || existingprewedding.date
-    existingprewedding.country = country || existingprewedding.country
-    existingprewedding.location = location || existingprewedding.location
-
-
-    if (req.files['images'] && req.files['images'].length > 0) {
-        const newImages = req.files['images'].map(file => file.filename);
-        existingprewedding.images = existingprewedding.images.concat(newImages);
-    }
-
-    if (req.files['posterimage'] && req.files['posterimage'].length > 0) {
-        existingprewedding.posterimage = req.files['posterimage'][0].filename;
-    }
-
-    if (req.files['teaser'] && req.files['teaser'].length > 0) {
-        existingprewedding.teaser = req.files['teaser'][0].filename;
-    }
-
-    await existingprewedding.save()
-    res.status(201).json({success:true , existingprewedding})
-
-})
-
 exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
     const existingprewedding = await preweddingModel.findById(req.params.id).exec()
     const previousPreweddingPosterID = existingprewedding.posterimage.fileId
     const previousPreweddingVideoID = existingprewedding.teaser.fileId
     let newpreweddingPoster = req.files?.posterimage
     let newpreweddingVideo = req.files?.teaser
+    let files = req.files?.images
 
     const { date, bridename, groomname, location, country } = req.body;
 
@@ -593,22 +565,10 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
 
         const uploadedNewpreweddingPosterImage = [];
         const uploadedNewpreweddingTeaser = [];
+        const uploadedNewpreweddingImages = [];
         const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
         const allowedVideoTypes = ['video/mp4'];
             
-        // if (newpreweddingPoster && !Array.isArray(newpreweddingPoster)) {
-        //     console.log('File:', newpreweddingPoster); // Add this line for debugging
-        
-        //     if (!newpreweddingPoster || !newpreweddingPoster.mimetype || !allowedImageTypes.includes(newpreweddingPoster.mimetype)) {
-        //         console.log('Invalid file:', newpreweddingPoster); // Add this line for debugging
-        
-        //         return res.status(400).json({
-        //             success: false,
-        //             message: `File type ${newpreweddingPoster ? newpreweddingPoster.mimetype : 'undefined'} is not supported for preweddingposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-        //         });
-        //     }
-        // }
-
         if (newpreweddingPoster && !Array.isArray(newpreweddingPoster)) {
             if (!newpreweddingPoster || !newpreweddingPoster.mimetype || !allowedImageTypes.includes(newpreweddingPoster.mimetype)) {
                 return res.status(400).json({
@@ -630,7 +590,6 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
             });
             
             uploadedNewpreweddingPosterImage.push({ fileId , url })
-        
         }
         
         if (newpreweddingVideo && !Array.isArray(newpreweddingVideo)) {
@@ -655,6 +614,31 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
             
             uploadedNewpreweddingTeaser.push({ fileId , url })
         
+        }
+        if(!Array.isArray(files)){
+            files = [files]
+        }
+        if(files.length > 0){
+            for (const file of files) {
+                if(allowedImageTypes.includes(file.mimetype)){
+        
+                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        
+                const { fileId, url } = await imagekit.upload({
+                    file: file.data,
+                    fileName: modifiedName
+                });
+        
+                uploadedNewpreweddingImages.push({ fileId , url })
+                existingprewedding.images = existingprewedding.images.concat(uploadedNewpreweddingImages)
+            }
+            else {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+            }
         }
 
         if(uploadedNewpreweddingPosterImage.length > 0){
@@ -700,51 +684,30 @@ exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => 
 
     const updationImage = imagesEntry.images[index].fileId;
 
-    if (files && !Array.isArray(files)) {
-        if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
-            return res.status(400).json({
-                success: false,
-                message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-            });
-        }
-
-        // Delete previous file before uploading new one
-        if (updationImage.length > 0) {
-            await imagekit.deleteFile(updationImage);
-        }
-        
-        // Handle the file upload for files
-        const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
-        const { fileId, url } = await imagekit.upload({
-            file: files.data,
-            fileName: modifiedNamePoster,
-        });
-        
-        imagesEntry.images[index] = { fileId , url }
-        // uploadedNewImages.push({ fileId , url })
-        // console.log(uploadedNewImages)
-    }
-    else{
-        for (const file of files) {
-            if(allowedImageTypes.includes(file.mimetype)){
-    
-            const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-    
-            const { fileId, url } = await imagekit.upload({
-                file: file.data,
-                fileName: modifiedName
-            });
-    
-            uploadedNewImages.push({ fileId , url })
-            imagesEntry.images = imagesEntry.images.concat(uploadedNewImages) || imagesEntry.images.concat(uploadedNewImages)
-            
-        }
-            else {
+    if(updationImage.length > 0){
+        if (files && !Array.isArray(files)) {
+            if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
                 return res.status(400).json({
                     success: false,
-                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
                 });
             }
+    
+            // Delete previous file before uploading new one
+            if (updationImage.length > 0) {
+                await imagekit.deleteFile(updationImage);
+            }
+            
+            // Handle the file upload for files
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: files.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            imagesEntry.images[index] = { fileId , url }
+            // uploadedNewImages.push({ fileId , url })
+            // console.log(uploadedNewImages)
         }
     }
 
@@ -754,7 +717,7 @@ exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => 
     res.status(200).json({
         success: true,
         message: "Image successfully updated",
-        // deletedImage,
+        // updationImage,
     });
 });
 
