@@ -53,6 +53,10 @@ const {
     updateImages,
     deletesinglepreweddingimage,
     updatesinglepreweddingimage,
+    updatesinglefashionimage,
+    deletesinglefashionimage,
+    deletesingleeventimage,
+    updatesingleeventimage,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -215,23 +219,23 @@ router.post("/deletesinglematernityimages/:imageIndex", isAuthenticated , delete
 
 // ------------------------------------------ fashion Opening ---------------------------------------
 
-// Post /createStories
-router.post("/createfashion", isAuthenticated, upload.fields([
-    {name:"posterimage" , maxCount: 1},
-    {name:"images" , maxCount: 20}
-]) ,createfashion)
+// Post /createfashion
+router.post("/createfashion", isAuthenticated , createfashion)
 
-// Post /updateStories
-router.post("/updatefashion/:id", isAuthenticated, upload.fields([
-    {name:"posterimage" , maxCount: 1},
-    {name:"images" , maxCount: 20}
-]) ,updatefashion)
+// Post /updatefashion
+router.post("/updatefashion/:id", isAuthenticated ,updatefashion)
+
+// Post /updatesinglefashionimage
+router.post("/updatesinglefashionimage/:id/:imageIndex", isAuthenticated , updatesinglefashionimage )
 
 // Post /findallfashion
 router.post("/findallfashion" ,findallfashion)
 
 // Post /findsinglefashion
 router.post("/findsinglefashion/:id" ,findsinglefashion)
+
+// Post /deletesinglefashion
+router.post("/deletesinglefashionimage/:id/:imageIndex" , isAuthenticated ,deletesinglefashionimage)
 
 // Post /deletesinglefashion
 router.post("/deletesinglefashion/:id" , isAuthenticated ,deletesinglefashion)
@@ -241,17 +245,14 @@ router.post("/deletesinglefashion/:id" , isAuthenticated ,deletesinglefashion)
 
 // ------------------------------------------ event Opening ---------------------------------------
 
-// Post /createStories
-router.post("/createevent", isAuthenticated, upload.fields([
-    {name:"posterimage" , maxCount: 1},
-    {name:"images" , maxCount: 20}
-])  ,createevent)
+// Post /createevent
+router.post("/createevent", isAuthenticated , createevent)
 
-// Post /updateStories
-router.post("/updateevent/:id", isAuthenticated, upload.fields([
-    {name:"posterimage" , maxCount: 1},
-    {name:"images" , maxCount: 20}
-])  ,updateevent)
+// Post /updateevent
+router.post("/updateevent/:id", isAuthenticated , updateevent)
+
+// Post /updatesingleeventimage
+router.post("/updatesingleeventimage/:id/:imageIndex", isAuthenticated , updatesingleeventimage )
 
 // Post /findallevent
 router.post("/findallevent" ,findallevent)
@@ -259,13 +260,13 @@ router.post("/findallevent" ,findallevent)
 // Post /findsingleevent
 router.post("/findsingleevent/:id" ,findsingleevent)
 
+// Post /deletesingleeventimage
+router.post("/deletesingleeventimage/:id/:imageIndex" , isAuthenticated ,deletesingleeventimage)
+
 // Post /deletesingleevent
 router.post("/deletesingleevent/:id" , isAuthenticated ,deletesingleevent)
+
 // ------------------------------------------ event Closing ---------------------------------------
-
-
-
-
 
 
 

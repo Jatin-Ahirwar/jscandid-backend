@@ -655,7 +655,6 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
         res.status(201).json(existingprewedding);
 })
 
-
 exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => {
     const PreweddingID = req.params.id
     const userID = await userModel.findById(req.id).exec();
@@ -720,54 +719,6 @@ exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => 
         // updationImage,
     });
 });
-
-
-
-// exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => {
-//     const PreweddingID = req.params.id
-//     const userID = await userModel.findById(req.id).exec();
-//     const imagesEntry = await preweddingModel.findById(PreweddingID).exec();
-//     let files = req.files.images;
-
-//     if (!imagesEntry) {
-//         return res.status(404).json({
-//             success: false,
-//             message: "No images found for the user.",
-//         });
-//     }
-
-//     const index  = req.params.imageIndex;
-
-//     // Check if the index is valid
-//     if (index < 0 || index >= imagesEntry.images.length) {
-//         return res.status(400).json({
-//             success: false,
-//             message: "Invalid index provided.",
-//         });
-//     }
-
-//     const deletedImage = imagesEntry.images[index].fileId;
-
-//     console.log(index,deletedImage)
-//     // Delete the image from ImageKit
-//     if(files.length > 0) {
-//         await imagekit.deleteFile(deletedImage);
-//         for(const file  files)
-
-//     }
-
-//     // Remove the image from the local database
-//     imagesEntry.images.splice(index, 1);
-
-//     // Save the changes
-//     await imagesEntry.save();
-
-//     res.status(200).json({
-//         success: true,
-//         message: "Image deleted successfully",
-//         deletedImage
-//     });
-// });
 
 exports.findallprewedding = catchAsyncError(async (req,res,next) =>{
         const allprewedding = await preweddingModel.find().exec()
@@ -864,6 +815,7 @@ exports.deletesingleprewedding = catchAsyncError(async (req, res, next) => {
         message: "Prewedding deleted successfully",
     });
 });
+
 // ------------------------------------------ prewedding Closing ---------------------------------------
 
 
@@ -950,100 +902,6 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
             trailer: newTrailer,
         });
 });
-
-// exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
-//     const existingtrailer = await trailerModel.findById(req.params.id).exec()
-//     const previousTrailerPosterID = existingtrailer.trailerposter.fileId
-//     const previousTrailerVideoID = existingtrailer.trailervideo.fileId
-//     let newTrailerPoster = req.files?.trailerposter
-//     let newTrailerVideo = req.files?.trailervideo
-
-//     // console.log(previousTrailerPosterID,previousTrailerVideoID)
-//     console.log(newTrailerPoster,newTrailerVideo)
-    
-//     // const { date, bridename, groomname, location, country } = req.body;
-
-//     //     existingtrailer.date = date || existingtrailer.date
-//     //     existingtrailer.bridename = bridename || existingtrailer.bridename
-//     //     existingtrailer.groomname = groomname || existingtrailer.groomname
-//     //     existingtrailer.location = location || existingtrailer.location
-//     //     existingtrailer.country = country || existingtrailer.country
-
-
-//         // const uploadedNewTrailerPoster = [];
-//         // const uploadedNewTrailerVideo = [];
-//         // const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
-//         // const allowedVideoTypes = ['video/mp4'];
-    
-//         // if (!Array.isArray(newTrailerPoster)) {
-//         //     newTrailerPoster = [newTrailerPoster];
-//         // }
-        
-//         // if(newTrailerPoster.length > 0 ){
-//         //     if(previousTrailerPosterID.length > 0){
-//         //         await imagekit.deleteFile(previousTrailerPosterID)
-//         //     }
-            
-//         //     for (const file of newTrailerPoster) {
-//         //         if (!file || !file.mimetype || !allowedImageTypes.includes(file.mimetype)) {
-//         //             return res.status(400).json({
-//         //                 success: false,
-//         //                     // message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-//         //                     message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-//         //             });
-//         //             }
-                
-//         //         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-//         //         const { fileId, url } = await imagekit.upload({
-//         //             file: file.data,
-//         //             fileName: modifiedName,
-//         //         });
-            
-//         //         uploadedNewTrailerPoster.push({ fileId, url });
-//         //     }
-//         // }
-
-//         // if (!Array.isArray(newTrailerVideo)) {
-//         //     newTrailerVideo = [newTrailerVideo];
-//         // }
-        
-//         // if(newTrailerVideo.length > 0 ){
-//         //     if(previousTrailerVideoID.length > 0){
-//         //         await imagekit.deleteFile(previousTrailerVideoID)
-//         //     }
-            
-//         //     for (const file of newTrailerVideo) {
-//         //         if (!file || !file.mimetype || !allowedVideoTypes.includes(file.mimetype)) {
-//         //             return res.status(400).json({
-//         //                 success: false,
-//         //                     // message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
-//         //                     message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
-//         //             });
-//         //             }
-                
-//         //         const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-//         //         const { fileId, url } = await imagekit.upload({
-//         //             file: file.data,
-//         //             fileName: modifiedName,
-//         //         });
-            
-//         //         uploadedNewTrailerVideo.push({ fileId, url });
-//         //     }
-//         // }
-
-//         // if(uploadedNewTrailerPoster.length > 0){
-//         //     existingtrailer.trailerposter.fileId = uploadedNewTrailerPoster[0].fileId || uploadedNewTrailerPoster[0].fileId
-//         //     existingtrailer.trailerposter.url = uploadedNewTrailerPoster[0].url || uploadedNewTrailerPoster[0].url
-//         // }
-
-//         // if(uploadedNewTrailerVideo.length > 0){
-//         //     existingtrailer.trailervideo.fileId = uploadedNewTrailerVideo[0].fileId || uploadedNewTrailerVideo[0].fileId
-//         //     existingtrailer.trailervideo.url = uploadedNewTrailerVideo[0].url || uploadedNewTrailerVideo[0].url
-//         // }
-
-//         await existingtrailer.save();
-//         res.status(201).json(existingtrailer);
-// })
 
 exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
     const existingtrailer = await trailerModel.findById(req.params.id).exec()
@@ -1486,46 +1344,281 @@ exports.deletesinglematernityimages = catchAsyncError(async (req, res, next) => 
 // ------------------------------------------ fashion Opening ---------------------------------------
 
 exports.createfashion = catchAsyncError(async (req, res, next) => {
-    const user = await userModel.findById(req.id).exec()
-    const { modelname , location , country } = req.body;
+    const userID = await userModel.findById(req.id).exec();
+    const { modelname , country , location } = req.body
+    let posterimage = req.files?.posterimage;
+    let teaser = req.files?.teaser;
+    let files = req.files?.images;
 
-    const newFashion = new fashionModel({
-        modelname , location , country
-     });
-
-     if (!req.files['posterimage'] || !req.files['images'] || req.files['images'].length === 0) {
-         return res.status(400).json({ message: 'At least one image is required' });
-     }
-
-     newFashion.posterimage = req.files['posterimage'][0].filename
-     newFashion.images = req.files['images'].map(file => file.filename)
-
-     newFashion.user = user._id
-     user.fashion.push(newFashion._id)
-     await newFashion.save();
-     await user.save();
-
-     res.status(201).json(newFashion);
-})
-
-exports.updatefashion = catchAsyncError(async (req, res, next) => {
-    const existingfashion = await fashionModel.findById(req.params.id).exec()
-    const { modelname } = req.body;
-
-    existingfashion.modelname = modelname || existingfashion.modelname ;
     
-    if(req.files['posterimage'] && req.files['posterimage'].length > 0){
-        existingfashion.posterimage = req.files['posterimage'][0].filename
+    const uploadedPosterImage = [];
+    const uploadedTeaser = [];
+    const uploadedFiles = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+    const allowedVideoTypes = ['video/mp4'];
+
+    if (!Array.isArray(posterimage)) {
+        posterimage = [posterimage];
     }
 
-    if(req.files['images'] && req.files['images'].length > 0){
-       const newimages = req.files['images'].map(file => file.filename)
-       existingfashion.images = existingfashion.images.concat(newimages) 
+    for (const file of posterimage) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedPosterImage.push({ fileId, url });
     }
 
-    await existingfashion.save();
-    res.status(201).json(existingfashion);
+    if (!Array.isArray(teaser)) {
+        // If it's not an array, convert it to an array
+        teaser = [teaser];
+    }
+    for (const file of teaser) {
+        if (!allowedVideoTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+            message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+        });
+    }
+    
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+        
+        uploadedTeaser.push({ fileId, url });
+    }
+
+    if (!Array.isArray(posterimage)) {
+        posterimage = [posterimage];
+    }
+
+    for (const file of files) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedFiles.push({ fileId, url });
+    }
+
+        const newFashion = new fashionModel({
+            modelname,
+            location,
+            country,
+            posterimage: {
+                fileId: uploadedPosterImage[0].fileId,
+                url: uploadedPosterImage[0].url,
+            },
+            teaser: {
+                fileId: uploadedTeaser[0].fileId,
+                url: uploadedTeaser[0].url,
+            },
+            images: uploadedFiles,
+        });
+
+        newFashion.user = userID._id
+        userID.fashion.push(newFashion._id);
+        await newFashion.save();
+        await userID.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Fashion Feed created successfully",
+            Fashion: newFashion,
+        });
+
+});
+
+exports.updatefashion = catchAsyncError(async (req,res,next)=>{
+    const existingfashion = await fashionModel.findById(req.params.id).exec()
+    const previousfashionPosterID = existingfashion.posterimage.fileId
+    const previousfashionVideoID = existingfashion.teaser.fileId
+    let newfashionPoster = req.files?.posterimage
+    let newfashionVideo = req.files?.teaser
+    let files = req.files?.images
+
+    const { modelname , location, country } = req.body;
+
+        existingfashion.modelname = modelname || existingfashion.modelname
+        existingfashion.location = location || existingfashion.location
+        existingfashion.country = country || existingfashion.country
+
+        const uploadedNewfashionPosterImage = [];
+        const uploadedNewfashionTeaser = [];
+        const uploadedNewfashionImages = [];
+        const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+        const allowedVideoTypes = ['video/mp4'];
+            
+            if (newfashionPoster && !Array.isArray(newfashionPoster)) {
+                if (!newfashionPoster || !newfashionPoster.mimetype || !allowedImageTypes.includes(newfashionPoster.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${newfashionPoster ? newfashionPoster.mimetype : 'undefined'} is not supported for fashionposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+            
+                // Delete previous file before uploading new one
+                if (previousfashionPosterID.length > 0) {
+                    await imagekit.deleteFile(previousfashionPosterID);
+                }
+            
+                // Handle the file upload for newfashionPoster
+                const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(newfashionPoster.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: newfashionPoster.data,
+                    fileName: modifiedNamePoster,
+                });
+                
+                uploadedNewfashionPosterImage.push({ fileId , url })
+            }
+        
+            if (newfashionVideo && !Array.isArray(newfashionVideo)) {
+                if (!newfashionVideo || !newfashionVideo.mimetype || !allowedVideoTypes.includes(newfashionVideo.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${newfashionVideo ? newfashionVideo.mimetype : 'undefined'} is not supported for fashionvideo. Allowed video type: MP4`,
+                    });
+                }
+            
+                // Delete previous file before uploading new one
+                if (previousfashionVideoID.length > 0) {
+                    await imagekit.deleteFile(previousfashionVideoID);
+                }
+            
+                // Handle the file upload for newfashionVideo
+                const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(newfashionVideo.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: newfashionVideo.data,
+                    fileName: modifiedNameVideo,
+                });
+                
+                uploadedNewfashionTeaser.push({ fileId , url })
+            
+            }
+
+        if(!Array.isArray(files)){
+            files = [files]
+        }
+        
+        if(files.length > 0){
+            for (const file of files) {
+                if(allowedImageTypes.includes(file.mimetype)){
+        
+                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        
+                const { fileId, url } = await imagekit.upload({
+                    file: file.data,
+                    fileName: modifiedName
+                });
+        
+                uploadedNewfashionImages.push({ fileId , url })
+                existingfashion.images = existingfashion.images.concat(uploadedNewfashionImages)
+            }
+            else {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+            }
+        }
+
+        if(uploadedNewfashionPosterImage.length > 0){
+            existingfashion.posterimage.fileId = uploadedNewfashionPosterImage[0].fileId || uploadedNewfashionPosterImage[0].fileId
+            existingfashion.posterimage.url = uploadedNewfashionPosterImage[0].url || uploadedNewfashionPosterImage[0].url
+        }
+        
+        if(uploadedNewfashionTeaser.length > 0){
+            existingfashion.teaser.fileId = uploadedNewfashionTeaser[0].fileId || uploadedNewfashionTeaser[0].fileId
+            existingfashion.teaser.url = uploadedNewfashionTeaser[0].url || uploadedNewfashionTeaser[0].url
+        }
+
+        await existingfashion.save();
+        res.status(201).json(existingfashion);
 })
+
+exports.updatesinglefashionimage = catchAsyncError(async (req, res, next) => {
+    const FashionID = req.params.id
+    const imagesEntry = await fashionModel.findById(FashionID).exec();
+    let files = req.files.images
+    const index  = req.params.imageIndex;
+    const uploadedNewImages = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
+    }
+
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const updationImage = imagesEntry.images[index].fileId;
+
+    if(updationImage.length > 0){
+        if (files && !Array.isArray(files)) {
+            if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
+            }
+    
+            // Delete previous file before uploading new one
+            if (updationImage.length > 0) {
+                await imagekit.deleteFile(updationImage);
+            }
+            
+            // Handle the file upload for files
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: files.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            imagesEntry.images[index] = { fileId , url }
+            // uploadedNewImages.push({ fileId , url })
+            // console.log(uploadedNewImages)
+        }
+    }
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Fashion Images successfully updated",
+        imagesEntry,
+    });
+});
 
 exports.findallfashion = catchAsyncError(async (req,res,next) =>{
     const allfashion = await fashionModel.find().exec()
@@ -1537,21 +1630,91 @@ exports.findsinglefashion = catchAsyncError(async (req,res,next) =>{
         res.status(201).json({success:true , singlefashion })
 })
 
-exports.deletesinglefashion = catchAsyncError(async (req,res,next) =>{
-    
-    const user = await userModel.findById(req.id).exec()
-    const singlefashion = await fashionModel.findById(req.params.id).exec()
+exports.deletesinglefashionimage = catchAsyncError(async (req, res, next) => {
+    const FashionID = req.params.id
+    const imagesEntry = await fashionModel.findById(FashionID).exec();
 
-    await fashionModel.deleteOne({ _id: singlefashion._id})
-    const indexToRemove = user.fashion.indexOf(singlefashion._id);
-    
-    if (indexToRemove !== -1) {
-        user.fashion.splice(indexToRemove, 1);
-        await user.save();
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
     }
-    res.status(201).json({success:true , singlefashion , user  })
+
+    const index  = req.params.imageIndex;
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const deletedImage = imagesEntry.images[index].fileId;
+
+    // Delete the image from ImageKit
+    await imagekit.deleteFile(deletedImage);
+
+    // Remove the image from the local database
+    imagesEntry.images.splice(index, 1);
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image deleted successfully",
+        deletedImage
+    });
+});
+
+exports.deletesinglefashion = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const fashionID = req.params.id;
     
-})
+    // Find the fashion by ID
+    const fashion = await fashionModel.findById(fashionID);
+    const fashionposterimage = fashion.posterimage.fileId
+    const fashionteaser = fashion.teaser.fileId
+    const fashionimages = fashion.images
+
+    
+    if (!fashion) {
+        return res.status(404).json({
+            success: false,
+            message: "fashion not found",
+        });
+    }
+    if(fashion){
+        await imagekit.deleteFile(fashionposterimage),
+        await imagekit.deleteFile(fashionteaser)
+        for (const image of fashionimages) {
+            await imagekit.deleteFile(image.fileId);
+        }    
+    }
+    // await Promise.all([
+    //     imagekit.deleteFile(fashionposterimage),
+    //     imagekit.deleteFile(fashionteaser)
+        
+    // ])
+
+    // Update the user model to remove the fashion reference
+    await fashionModel.deleteOne({ _id: fashion._id})
+    
+
+    const index = userID.fashion.indexOf(fashionID);
+    if (index !== -1) {
+        userID.fashion.splice(index, 1);
+        await userID.save();
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "fashion deleted successfully",
+    });
+});
+
 
 // ------------------------------------------ fashion Closing ---------------------------------------
 
@@ -1560,47 +1723,281 @@ exports.deletesinglefashion = catchAsyncError(async (req,res,next) =>{
 // ------------------------------------------ event Opening ---------------------------------------
 
 exports.createevent = catchAsyncError(async (req, res, next) => {
-    const user = await userModel.findById(req.id).exec()
-    const { modelname  , location , country } = req.body;
-
-
-    const newEvent = new eventModel({
-        modelname, location , country
-     });
-
-     if (!req.files['posterimage'] || req.files['images'].length === 0) {
-         return res.status(400).json({ message: 'At least one image is required' });
-     }
-
-     newEvent.posterimage = req.files['posterimage'][0].filename
-     newEvent.images = req.files['images'].map(file => file.filename)
-
-     newEvent.user = user._id
-     user.event.push(newEvent._id)
-     await newEvent.save();
-     await user.save();
-
-     res.status(201).json(newEvent);
-})
-
-exports.updateevent = catchAsyncError(async (req, res, next) => {
-    const existingevent = await eventModel.findById(req.params.id).exec()
-    const { modelname } = req.body;
-
-    existingevent.modelname = modelname || existingevent.modelname ;
+    const userID = await userModel.findById(req.id).exec();
+    const { modelname , country , location } = req.body
+    let posterimage = req.files?.posterimage;
+    let teaser = req.files?.teaser;
+    let files = req.files?.images;
     
-    if(req.files['posterimage'] && req.files['posterimage'].length > 0){
-        existingevent.posterimage = req.files['posterimage'][0].filename
+    const uploadedPosterImage = [];
+    const uploadedTeaser = [];
+    const uploadedFiles = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+    const allowedVideoTypes = ['video/mp4'];
+
+    if (!Array.isArray(posterimage)) {
+        posterimage = [posterimage];
     }
 
-    if (req.files['images'] && req.files['images'].length > 0) {
-        const newImages = req.files['images'].map(file => file.filename);
-        existingevent.images = existingevent.images.concat(newImages);
+    for (const file of posterimage) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedPosterImage.push({ fileId, url });
     }
 
-    await existingevent.save();
-    res.status(201).json(existingevent);
+    if (!Array.isArray(teaser)) {
+        // If it's not an array, convert it to an array
+        teaser = [teaser];
+    }
+    for (const file of teaser) {
+        if (!allowedVideoTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+            message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+        });
+    }
+    
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+        
+        uploadedTeaser.push({ fileId, url });
+    }
+
+    if (!Array.isArray(posterimage)) {
+        posterimage = [posterimage];
+    }
+
+    for (const file of files) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedFiles.push({ fileId, url });
+    }
+
+        const newEvent = new eventModel({
+            modelname,
+            location,
+            country,
+            posterimage: {
+                fileId: uploadedPosterImage[0].fileId,
+                url: uploadedPosterImage[0].url,
+            },
+            teaser: {
+                fileId: uploadedTeaser[0].fileId,
+                url: uploadedTeaser[0].url,
+            },
+            images: uploadedFiles,
+        });
+
+        newEvent.user = userID._id
+        userID.event.push(newEvent._id);
+        await newEvent.save();
+        await userID.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Event Feed created successfully",
+            NEWEVENT: newEvent,
+        });
+
+});
+
+exports.updateevent = catchAsyncError(async (req,res,next)=>{
+    const existingevent = await eventModel.findById(req.params.id).exec()
+    const previouseventPosterID = existingevent.posterimage.fileId
+    const previouseventVideoID = existingevent.teaser.fileId
+    let neweventPoster = req.files?.posterimage
+    let neweventVideo = req.files?.teaser
+    let files = req.files?.images
+
+    const { modelname , location, country } = req.body;
+
+        existingevent.modelname = modelname || existingevent.modelname
+        existingevent.location = location || existingevent.location
+        existingevent.country = country || existingevent.country
+
+        const uploadedNeweventPosterImage = [];
+        const uploadedNeweventTeaser = [];
+        const uploadedNeweventImages = [];
+        const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+        const allowedVideoTypes = ['video/mp4'];
+            
+            if (neweventPoster && !Array.isArray(neweventPoster)) {
+                if (!neweventPoster || !neweventPoster.mimetype || !allowedImageTypes.includes(neweventPoster.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${neweventPoster ? neweventPoster.mimetype : 'undefined'} is not supported for eventposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+            
+                // Delete previous file before uploading new one
+                if (previouseventPosterID.length > 0) {
+                    await imagekit.deleteFile(previouseventPosterID);
+                }
+            
+                // Handle the file upload for neweventPoster
+                const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(neweventPoster.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: neweventPoster.data,
+                    fileName: modifiedNamePoster,
+                });
+                
+                uploadedNeweventPosterImage.push({ fileId , url })
+            }
+        
+            if (neweventVideo && !Array.isArray(neweventVideo)) {
+                if (!neweventVideo || !neweventVideo.mimetype || !allowedVideoTypes.includes(neweventVideo.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${neweventVideo ? neweventVideo.mimetype : 'undefined'} is not supported for eventvideo. Allowed video type: MP4`,
+                    });
+                }
+            
+                // Delete previous file before uploading new one
+                if (previouseventVideoID.length > 0) {
+                    await imagekit.deleteFile(previouseventVideoID);
+                }
+            
+                // Handle the file upload for neweventVideo
+                const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(neweventVideo.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: neweventVideo.data,
+                    fileName: modifiedNameVideo,
+                });
+                
+                uploadedNeweventTeaser.push({ fileId , url })
+            
+            }
+
+        if(!Array.isArray(files)){
+            files = [files]
+        }
+        
+        if(files.length > 0){
+            for (const file of files) {
+                if(allowedImageTypes.includes(file.mimetype)){
+        
+                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        
+                const { fileId, url } = await imagekit.upload({
+                    file: file.data,
+                    fileName: modifiedName
+                });
+        
+                uploadedNeweventImages.push({ fileId , url })
+                existingevent.images = existingevent.images.concat(uploadedNeweventImages)
+            }
+            else {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+            }
+        }
+
+
+        if(uploadedNeweventPosterImage.length > 0){
+            existingevent.posterimage.fileId = uploadedNeweventPosterImage[0].fileId || uploadedNeweventPosterImage[0].fileId
+            existingevent.posterimage.url = uploadedNeweventPosterImage[0].url || uploadedNeweventPosterImage[0].url
+        }
+        
+        if(uploadedNeweventTeaser.length > 0){
+            existingevent.teaser.fileId = uploadedNeweventTeaser[0].fileId || uploadedNeweventTeaser[0].fileId
+            existingevent.teaser.url = uploadedNeweventTeaser[0].url || uploadedNeweventTeaser[0].url
+        }
+
+        await existingevent.save();
+        res.status(201).json(existingevent);
 })
+
+exports.updatesingleeventimage = catchAsyncError(async (req, res, next) => {
+    const EventID = req.params.id
+    const imagesEntry = await eventModel.findById(EventID).exec();
+    let files = req.files.images
+    const index  = req.params.imageIndex;
+    const uploadedNewImages = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
+    }
+
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const updationImage = imagesEntry.images[index].fileId;
+
+    if(updationImage.length > 0){
+        if (files && !Array.isArray(files)) {
+            if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
+            }
+    
+            // Delete previous file before uploading new one
+            if (updationImage.length > 0) {
+                await imagekit.deleteFile(updationImage);
+            }
+            
+            // Handle the file upload for files
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: files.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            imagesEntry.images[index] = { fileId , url }
+            // uploadedNewImages.push({ fileId , url })
+            // console.log(uploadedNewImages)
+        }
+    }
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Event Images successfully updated",
+        imagesEntry,
+    });
+});
 
 exports.findallevent = catchAsyncError(async (req,res,next) =>{
     const allevent = await eventModel.find().exec()
@@ -1612,20 +2009,84 @@ exports.findsingleevent = catchAsyncError(async (req,res,next) =>{
         res.status(201).json({success:true , singleevent })
 })
 
-exports.deletesingleevent = catchAsyncError(async (req,res,next) =>{
-    
-    const user = await userModel.findById(req.id).exec()
-    const singleevent = await eventModel.findById(req.params.id).exec()
+exports.deletesingleeventimage = catchAsyncError(async (req, res, next) => {
+    const eventID = req.params.id
+    const imagesEntry = await eventModel.findById(eventID).exec();
 
-    await eventModel.deleteOne({ _id: singleevent._id})
-    const indexToRemove = user.event.indexOf(singleevent._id);
-    
-    if (indexToRemove !== -1) {
-        user.event.splice(indexToRemove, 1);
-        await user.save();
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
     }
-    res.status(201).json({success:true , singleevent , user  })
+
+    const index  = req.params.imageIndex;
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const deletedImage = imagesEntry.images[index].fileId;
+
+    // Delete the image from ImageKit
+    await imagekit.deleteFile(deletedImage);
+
+    // Remove the image from the local database
+    imagesEntry.images.splice(index, 1);
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image deleted successfully",
+        deletedImage
+    });
+});
+
+exports.deletesingleevent = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const eventID = req.params.id;
     
-})
+    // Find the event by ID
+    const event = await eventModel.findById(eventID);
+    const eventposterimage = event.posterimage.fileId
+    const eventteaser = event.teaser.fileId
+    const eventimages = event.images
+
+    
+    if (!event) {
+        return res.status(404).json({
+            success: false,
+            message: "event not found",
+        });
+    }
+    if(event){
+        await imagekit.deleteFile(eventposterimage),
+        await imagekit.deleteFile(eventteaser)
+        for (const image of eventimages) {
+            await imagekit.deleteFile(image.fileId);
+        }    
+    }
+
+    // Update the user model to remove the event reference
+    await eventModel.deleteOne({ _id: event._id})
+    
+
+    const index = userID.event.indexOf(eventID);
+    if (index !== -1) {
+        userID.event.splice(index, 1);
+        await userID.save();
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "event deleted successfully",
+    });
+});
 
 // ------------------------------------------ event Closing ---------------------------------------

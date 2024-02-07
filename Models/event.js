@@ -16,6 +16,16 @@ const eventModel = new mongoose.Schema({
             required: [true, "URL is required"]
         }
     },
+    teaser:{
+        fileId: {
+            type: String,
+            required: [true, "File ID is required"]
+        },
+        url: {
+            type: String,
+            required: [true, "URL is required"]
+        }
+    },
     images:[{
         fileId: {
             type: String,
