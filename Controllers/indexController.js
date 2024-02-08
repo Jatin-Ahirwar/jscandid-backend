@@ -89,62 +89,179 @@ exports.adminsignout = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------Stories Opening ---------------------------------------
 
-exports.createstories = catchAsyncError(async (req,res,next) =>{
-    const user = await userModel.findById(req.id).exec()
-    const { bridename , groomname , date , title , location , venue  } = req.body
+exports.createstories = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    let { date, bridename, groomname, location, venue, title } = req.body;
+    let posterimage = req.files.posterimage;
+    let teaser = req.files.teaser;
 
-    const posterimage = req.files && req.files['posterimage'] && req.files['posterimage'][0] && req.files['posterimage'][0].filename;
-    const teaser = req.files && req.files['teaser'] && req.files['teaser'][0] && req.files['teaser'][0].filename;
-
-    const newstories = new storiesModel({
-        posterimage,
-        teaser,
-        bridename,
-        groomname,
-        date,
-        title,
-        location,
-        venue,
-    });
     
-    newstories.user = user._id
-    user.stories.push(newstories._id)
-    await newstories.save()
-    await user.save()
-    res.status(201).json({success:true , newstories})
-})
+    const uploadedposterimage = [];
+    const uploadedteaser = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+    const allowedVideoTypes = ['video/mp4'];
 
-exports.updatestories = catchAsyncError(async (req,res,next) =>{
-    const existingstories = await storiesModel.findById(req.params.id).exec()
-    const { bridename , groomname , date , title , location , venue  } = req.body
-
-    existingstories.bridename = bridename || existingstories.bridename
-    existingstories.groomname = groomname || existingstories.groomname
-    existingstories.date = date || existingstories.date
-    existingstories.title = title || existingstories.title
-    existingstories.location = location || existingstories.location
-    existingstories.venue = venue || existingstories.venue
-
-    if(req.files["posterimage"] &&  req.files["posterimage"].length > 0){
-        existingstories.posterimage = req.files["posterimage"][0].filename
+    if (!Array.isArray(posterimage)) {
+        posterimage = [posterimage];
     }
 
-    if(req.files["teaser"] &&  req.files["teaser"].length > 0){
-        existingstories.teaser = req.files["teaser"][0].filename
+    for (const file of posterimage) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for posterimage. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedposterimage.push({ fileId, url });
+    }
+
+    if (!Array.isArray(teaser)) {
+        // If it's not an array, convert it to an array
+        teaser = [teaser];
+    }
+    for (const file of teaser) {
+        if (!allowedVideoTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+            message: `File type ${file.mimetype} is not supported for teaser. Allowed video type: MP4`,
+        });
     }
     
-    await existingstories.save()
-    res.status(201).json({success:true , existingstories})
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+        
+        uploadedteaser.push({ fileId, url });
+    }
+
+        const newStory = new storiesModel({
+            date,
+            bridename,
+            groomname,
+            location,
+            venue,
+            title,
+            posterimage: {
+                fileId: uploadedposterimage[0].fileId,
+                url: uploadedposterimage[0].url,
+            },
+            teaser: {
+                fileId: uploadedteaser[0].fileId,
+                url: uploadedteaser[0].url,
+            },
+            });
+
+        newStory.user = userID._id
+        userID.stories.push(newStory._id);
+        await newStory.save();
+        await userID.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Story uploaded successfully",
+            Story: newStory,
+        });
+});
+
+exports.updatestories = catchAsyncError(async (req,res,next)=>{
+    const existingstory = await storiesModel.findById(req.params.id).exec()
+    const previousstoryPosterID = existingstory.posterimage.fileId
+    const previousstoryVideoID = existingstory.teaser.fileId
+    let newstoryPoster = req.files?.posterimage
+    let newstoryVideo = req.files?.teaser
+
+    const { date, bridename, groomname, location, venue , title } = req.body;
+
+        existingstory.date = date || existingstory.date
+        existingstory.bridename = bridename || existingstory.bridename
+        existingstory.groomname = groomname || existingstory.groomname
+        existingstory.location = location || existingstory.location
+        existingstory.venue = venue || existingstory.venue
+        existingstory.title = title || existingstory.title
+
+        const uploadedNewstoryPoster = [];
+        const uploadedNewstoryVideo = [];
+        const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+        const allowedVideoTypes = ['video/mp4'];
+            
+        if (newstoryPoster && !Array.isArray(newstoryPoster)) {
+            if (!newstoryPoster || !newstoryPoster.mimetype || !allowedImageTypes.includes(newstoryPoster.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newstoryPoster ? newstoryPoster.mimetype : 'undefined'} is not supported for posterimage. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
+            }
+        
+            // Delete previous file before uploading new one
+            if (previousstoryPosterID.length > 0) {
+                await imagekit.deleteFile(previousstoryPosterID);
+            }
+        
+            // Handle the file upload for newstoryPoster
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(newstoryPoster.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newstoryPoster.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            uploadedNewstoryPoster.push({ fileId , url })
+        }
+        
+        if (newstoryVideo && !Array.isArray(newstoryVideo)) {
+            if (!newstoryVideo || !newstoryVideo.mimetype || !allowedVideoTypes.includes(newstoryVideo.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newstoryVideo ? newstoryVideo.mimetype : 'undefined'} is not supported for storyvideo. Allowed video type: MP4`,
+                });
+            }
+        
+            // Delete previous file before uploading new one
+            if (previousstoryVideoID.length > 0) {
+                await imagekit.deleteFile(previousstoryVideoID);
+            }
+        
+            // Handle the file upload for newstoryVideo
+            const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(newstoryVideo.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newstoryVideo.data,
+                fileName: modifiedNameVideo,
+            });
+            
+            uploadedNewstoryVideo.push({ fileId , url })
+        
+        }
+
+        if(uploadedNewstoryPoster.length > 0){
+            existingstory.posterimage.fileId = uploadedNewstoryPoster[0].fileId || uploadedNewstoryPoster[0].fileId
+            existingstory.posterimage.url = uploadedNewstoryPoster[0].url || uploadedNewstoryPoster[0].url
+        }
+
+        if(uploadedNewstoryVideo.length > 0){
+            existingstory.teaser.fileId = uploadedNewstoryVideo[0].fileId || uploadedNewstoryVideo[0].fileId
+            existingstory.teaser.url = uploadedNewstoryVideo[0].url || uploadedNewstoryVideo[0].url
+        }
+
+        await existingstory.save();
+        res.status(201).json(existingstory);
 })
 
 exports.findallstories = catchAsyncError(async (req,res,next) =>{
-        const allstories = await storiesModel.find().exec()
-        res.status(201).json({success:true , allstories })
+    const allstories = await storiesModel.find().exec()
+    res.status(201).json({success:true , allstories })
 })
 
 exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
-        const singlestorie = await storiesModel.findById(req.params.id).populate("storiesfunction").exec()
-        res.status(201).json({success:true , singlestorie })
+    const singlestorie = await storiesModel.findById(req.params.id).populate("storiesfunction").exec()
+    res.status(201).json({success:true , singlestorie })
 })
 
 exports.deletesinglestories = catchAsyncError(async (req,res,next) =>{
@@ -164,50 +281,193 @@ exports.deletesinglestories = catchAsyncError(async (req,res,next) =>{
     
 })
 
-exports.createstoriesfunction = catchAsyncError(async (req,res,next) =>{
+exports.createstoriesfunction = catchAsyncError(async (req, res, next) => {
     const stories = await storiesModel.findById(req.params.id).exec()
-    const { functionname } = req.body
+    const { functionname } = req.body;
+    let files = req.files?.images;
 
-    if(!req.files || req.files.length === 0){
-        return res.status(404).json({success:true , message: "files not found"})
+    
+    const uploadedFiles = [];
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+    if (!Array.isArray(files)) {
+        files = [files];
     }
 
-    const filenames = []
-    req.files.forEach((file)=>{
-        filenames.push(file.filename)
-    })
+    for (const file of files) {
+        if (!allowedImageTypes.includes(file.mimetype)) {
+            return res.status(400).json({
+                success: false,
+                    message: `File type ${file.mimetype} is not supported for images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+            });
+            }
+        
+        const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+        const { fileId, url } = await imagekit.upload({
+            file: file.data,
+            fileName: modifiedName,
+        });
+    
+        uploadedFiles.push({ fileId, url });
+    }
 
-    const newstoriesfunction = new storiesFunctionModel({
+    const newStoryfunction = new storiesFunctionModel({
         functionname,
-        images : filenames
+        images: uploadedFiles,
     });
-    
-    newstoriesfunction.stories = stories._id
-    stories.storiesfunction.push(newstoriesfunction._id)
-    await newstoriesfunction.save()
-    await stories.save()
-    res.status(201).json({success:true , newstoriesfunction})
+
+    newStoryfunction.stories = stories._id
+    stories.storiesfunction.push(newStoryfunction._id);
+    await newStoryfunction.save();
+    await stories.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Storiesfunction created successfully",
+        Storiesfunction: newStoryfunction,
+    });
+});
+
+exports.updatestoriesfunction = catchAsyncError(async (req,res,next)=>{
+    const existingstory = await storiesFunctionModel.findById(req.params.id).exec()
+    let newstoryImages = req.files?.images
+
+    const { functionname } = req.body;
+
+        existingstory.functionname = functionname || existingstory.functionname
+        const uploadedNewstoryImages = [];
+        const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+            
+        // Handle newstoryImages if present
+        if (newstoryImages) {
+            const imagesArray = Array.isArray(newstoryImages) ? newstoryImages : [newstoryImages];
+
+            for (const image of imagesArray) {
+                if (!image.mimetype || !allowedImageTypes.includes(image.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${image ? image.mimetype : 'undefined'} is not supported for story images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+
+                const modifiedNameImage = `imagekit-${Date.now()}${path.extname(image.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: image.data,
+                    fileName: modifiedNameImage,
+                });
+
+                uploadedNewstoryImages.push({ fileId, url });
+            }
+        }
+
+        if(uploadedNewstoryImages.length > 0){
+            existingstory.images = existingstory.images.concat(uploadedNewstoryImages)     
+        }
+
+        await existingstory.save();
+        res.status(201).json(existingstory);
 })
 
-exports.updatestoriesfunction = catchAsyncError(async (req,res,next) =>{
-    const existingfunction = await storiesFunctionModel.findById(req.params.id).exec()
-    const { functionname } = req.body
-    
-    if (!existingfunction) {
-        return res.status(404).json({ message: 'Function not found' });
+exports.updatesinglestoriesfunctionimage = catchAsyncError(async (req, res, next) => {
+    const storyfunctionID = req.params.id
+    const imagesEntry = await storiesFunctionModel.findById(storyfunctionID).exec();
+    let files = req.files.images
+    const index  = req.params.imageIndex;
+    const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
     }
 
-    const filenames = []
-    req.files.forEach((file)=>{
-        filenames.push(file.filename)
-    })
 
-    existingfunction.functionname = functionname;
-    existingfunction.images = existingfunction.images.concat(filenames)
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
 
-    await existingfunction.save()
-    res.status(201).json({success:true , existingfunction})
-})
+    const updationImage = imagesEntry.images[index].fileId;
+
+    if(updationImage.length > 0){
+        if (files && !Array.isArray(files)) {
+            if (!files || !files.mimetype || !allowedImageTypes.includes(files.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${files ? files.mimetype : 'undefined'} is not supported for Images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
+            }
+    
+            // Delete previous file before uploading new one
+            if (updationImage.length > 0) {
+                await imagekit.deleteFile(updationImage);
+            }
+            
+            // Handle the file upload for files
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(files.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: files.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            imagesEntry.images[index] = { fileId , url }
+            // uploadedNewImages.push({ fileId , url })
+            // console.log(uploadedNewImages)
+        }
+    }
+
+    // Save the changes
+    await imagesEntry.save();
+    res.status(200).json({
+        success: true,
+        message: "Image successfully updated",
+        imagesEntry,
+    });
+});
+
+exports.deletesinglestoriesfunctionimage = catchAsyncError(async (req, res, next) => {
+    const StoriesfunctionID = req.params.id
+    const imagesEntry = await storiesFunctionModel.findById(StoriesfunctionID).exec();
+
+    if (!imagesEntry) {
+        return res.status(404).json({
+            success: false,
+            message: "No images found for the user.",
+        });
+    }
+
+    const index  = req.params.imageIndex;
+
+    // Check if the index is valid
+    if (index < 0 || index >= imagesEntry.images.length) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid index provided.",
+        });
+    }
+
+    const deletedImage = imagesEntry.images[index].fileId;
+
+    // Delete the image from ImageKit
+    await imagekit.deleteFile(deletedImage);
+
+    // Remove the image from the local database
+    imagesEntry.images.splice(index, 1);
+
+    // Save the changes
+    await imagesEntry.save();
+
+    res.status(200).json({
+        success: true,
+        message: "Image deleted successfully",
+        deletedImage
+    });
+});
 
 exports.deletesingleStoriesfunction = catchAsyncError(async (req,res,next) =>{
 
@@ -589,7 +849,7 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
                 fileName: modifiedNamePoster,
             });
             
-            uploadedNewPreweddingImages.push({ fileId , url })
+            uploadedNewpreweddingPosterImage.push({ fileId , url })
         }
         
         if (newpreweddingVideo && !Array.isArray(newpreweddingVideo)) {
@@ -637,7 +897,9 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
             }
         }
 
-        if(uploadedNewPreweddingImages.length > 0){
+
+
+        if(uploadedNewpreweddingTeaser.length > 0){
             existingprewedding.images = existingprewedding.images.concat(uploadedNewPreweddingImages)     
         }
 
@@ -712,11 +974,10 @@ exports.updatesinglepreweddingimage = catchAsyncError(async (req, res, next) => 
 
     // Save the changes
     await imagesEntry.save();
-
     res.status(200).json({
         success: true,
         message: "Image successfully updated",
-        // updationImage,
+        updationImage,
     });
 });
 

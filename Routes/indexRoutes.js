@@ -57,6 +57,8 @@ const {
     deletesinglefashionimage,
     deletesingleeventimage,
     updatesingleeventimage,
+    updatesinglestoriesfunctionimage,
+    deletesinglestoriesfunctionimage,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -83,16 +85,10 @@ router.get("/signout", isAuthenticated ,adminsignout)
 // ------------------------------------------ Stories Opening ---------------------------------------
 
 // Post /createStories
-router.post("/createStories",isAuthenticated ,upload.fields([
-    {name: "posterimage" , maxCount: 1},
-    {name: "teaser" , maxCount: 1},
-])  ,createstories)
+router.post("/createStories", isAuthenticated , createstories)
 
 // Post /updateStories
-router.post("/updateStories/:id",isAuthenticated ,upload.fields([
-    {name: "posterimage" , maxCount: 1},
-    {name: "teaser" , maxCount: 1},
-])  ,updatestories)
+router.post("/updateStories/:id",isAuthenticated ,updatestories)
 
 // Post /findallstories
 router.post("/findallstories" ,findallstories)
@@ -104,10 +100,16 @@ router.post("/findsinglestories/:id" ,findsinglestories)
 router.post("/deletesinglestories/:id" , isAuthenticated ,deletesinglestories)
 
 // Post /createStoriesfunction
-router.post("/createStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,createstoriesfunction)
+router.post("/createStoriesfunction/:id",isAuthenticated ,createstoriesfunction)
 
 // Post /updateStoriesfunction
-router.post("/updateStoriesfunction/:id",isAuthenticated ,upload.array("images")  ,updatestoriesfunction)
+router.post("/updateStoriesfunction/:id" , isAuthenticated , updatestoriesfunction)
+
+// Post /updatesinglestoriesfunctionimage
+router.post("/updatesinglestoriesfunctionimage/:id/:imageIndex" , isAuthenticated , updatesinglestoriesfunctionimage)
+
+// Post /deletesinglestoriesfunctionimage
+router.post("/deletesinglestoriesfunctionimage/:id/:imageIndex" , isAuthenticated , deletesinglestoriesfunctionimage)
 
 // Post /deletesingleStoriesfunction
 router.post("/deletesingleStoriesfunction/:id1/:id2" , isAuthenticated , deletesingleStoriesfunction)
