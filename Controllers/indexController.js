@@ -553,7 +553,7 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
     const previousPreweddingVideoID = existingprewedding.teaser.fileId
     let newpreweddingPoster = req.files?.posterimage
     let newpreweddingVideo = req.files?.teaser
-    let files = req.files?.images
+    let newPreweddingImages = req.files?.images
 
     const { date, bridename, groomname, location, country } = req.body;
 
@@ -565,7 +565,7 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
 
         const uploadedNewpreweddingPosterImage = [];
         const uploadedNewpreweddingTeaser = [];
-        const uploadedNewpreweddingImages = [];
+        const uploadedNewPreweddingImages = [];
         const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
         const allowedVideoTypes = ['video/mp4'];
             
@@ -589,7 +589,7 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
                 fileName: modifiedNamePoster,
             });
             
-            uploadedNewpreweddingPosterImage.push({ fileId , url })
+            uploadedNewPreweddingImages.push({ fileId , url })
         }
         
         if (newpreweddingVideo && !Array.isArray(newpreweddingVideo)) {
@@ -613,32 +613,32 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
             });
             
             uploadedNewpreweddingTeaser.push({ fileId , url })
-        
         }
-        if(!Array.isArray(files)){
-            files = [files]
-        }
-        if(files.length > 0){
-            for (const file of files) {
-                if(allowedImageTypes.includes(file.mimetype)){
-        
-                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-        
-                const { fileId, url } = await imagekit.upload({
-                    file: file.data,
-                    fileName: modifiedName
-                });
-        
-                uploadedNewpreweddingImages.push({ fileId , url })
-                existingprewedding.images = existingprewedding.images.concat(uploadedNewpreweddingImages)
-            }
-            else {
-                return res.status(400).json({
-                    success: false,
-                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+
+        // Handle newPreweddingImages if present
+        if (newPreweddingImages) {
+            const imagesArray = Array.isArray(newPreweddingImages) ? newPreweddingImages : [newPreweddingImages];
+
+            for (const image of imagesArray) {
+                if (!image.mimetype || !allowedImageTypes.includes(image.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${image ? image.mimetype : 'undefined'} is not supported for Prewedding images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
                     });
                 }
+
+                const modifiedNameImage = `imagekit-${Date.now()}${path.extname(image.name)}`;
+                const { fileId, url } = await imagekit.upload({
+                    file: image.data,
+                    fileName: modifiedNameImage,
+                });
+
+                uploadedNewPreweddingImages.push({ fileId, url });
             }
+        }
+
+        if(uploadedNewPreweddingImages.length > 0){
+            existingprewedding.images = existingprewedding.images.concat(uploadedNewPreweddingImages)     
         }
 
         if(uploadedNewpreweddingPosterImage.length > 0){
@@ -923,19 +923,6 @@ exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
         const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
         const allowedVideoTypes = ['video/mp4'];
             
-        // if (newTrailerPoster && !Array.isArray(newTrailerPoster)) {
-        //     console.log('File:', newTrailerPoster); // Add this line for debugging
-        
-        //     if (!newTrailerPoster || !newTrailerPoster.mimetype || !allowedImageTypes.includes(newTrailerPoster.mimetype)) {
-        //         console.log('Invalid file:', newTrailerPoster); // Add this line for debugging
-        
-        //         return res.status(400).json({
-        //             success: false,
-        //             message: `File type ${newTrailerPoster ? newTrailerPoster.mimetype : 'undefined'} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-        //         });
-        //     }
-        // }
-
         if (newTrailerPoster && !Array.isArray(newTrailerPoster)) {
             if (!newTrailerPoster || !newTrailerPoster.mimetype || !allowedImageTypes.includes(newTrailerPoster.mimetype)) {
                 return res.status(400).json({
@@ -957,7 +944,6 @@ exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
             });
             
             uploadedNewTrailerPoster.push({ fileId , url })
-        
         }
         
         if (newTrailerVideo && !Array.isArray(newTrailerVideo)) {
@@ -1454,102 +1440,102 @@ exports.updatefashion = catchAsyncError(async (req,res,next)=>{
     const previousfashionVideoID = existingfashion.teaser.fileId
     let newfashionPoster = req.files?.posterimage
     let newfashionVideo = req.files?.teaser
-    let files = req.files?.images
+    let newFashionImages = req.files?.images
 
-    const { modelname , location, country } = req.body;
+    const { modelname, location, country } = req.body;
 
         existingfashion.modelname = modelname || existingfashion.modelname
         existingfashion.location = location || existingfashion.location
         existingfashion.country = country || existingfashion.country
 
-        const uploadedNewfashionPosterImage = [];
-        const uploadedNewfashionTeaser = [];
-        const uploadedNewfashionImages = [];
+        const uploadedNewfashionPoster = [];
+        const uploadedNewfashionVideo = [];
+        const uploadedNewFashionImages = [];
         const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
         const allowedVideoTypes = ['video/mp4'];
-            
-            if (newfashionPoster && !Array.isArray(newfashionPoster)) {
-                if (!newfashionPoster || !newfashionPoster.mimetype || !allowedImageTypes.includes(newfashionPoster.mimetype)) {
-                    return res.status(400).json({
-                        success: false,
-                        message: `File type ${newfashionPoster ? newfashionPoster.mimetype : 'undefined'} is not supported for fashionposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-                    });
-                }
-            
-                // Delete previous file before uploading new one
-                if (previousfashionPosterID.length > 0) {
-                    await imagekit.deleteFile(previousfashionPosterID);
-                }
-            
-                // Handle the file upload for newfashionPoster
-                const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(newfashionPoster.name)}`;
-                const { fileId, url } = await imagekit.upload({
-                    file: newfashionPoster.data,
-                    fileName: modifiedNamePoster,
-                });
-                
-                uploadedNewfashionPosterImage.push({ fileId , url })
-            }
         
-            if (newfashionVideo && !Array.isArray(newfashionVideo)) {
-                if (!newfashionVideo || !newfashionVideo.mimetype || !allowedVideoTypes.includes(newfashionVideo.mimetype)) {
-                    return res.status(400).json({
-                        success: false,
-                        message: `File type ${newfashionVideo ? newfashionVideo.mimetype : 'undefined'} is not supported for fashionvideo. Allowed video type: MP4`,
-                    });
-                }
-            
-                // Delete previous file before uploading new one
-                if (previousfashionVideoID.length > 0) {
-                    await imagekit.deleteFile(previousfashionVideoID);
-                }
-            
-                // Handle the file upload for newfashionVideo
-                const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(newfashionVideo.name)}`;
-                const { fileId, url } = await imagekit.upload({
-                    file: newfashionVideo.data,
-                    fileName: modifiedNameVideo,
-                });
-                
-                uploadedNewfashionTeaser.push({ fileId , url })
-            
-            }
+        // Handle newFashionImages if present
+        if (newFashionImages) {
+            const imagesArray = Array.isArray(newFashionImages) ? newFashionImages : [newFashionImages];
 
-        if(!Array.isArray(files)){
-            files = [files]
-        }
-        
-        if(files.length > 0){
-            for (const file of files) {
-                if(allowedImageTypes.includes(file.mimetype)){
-        
-                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-        
+            for (const image of imagesArray) {
+                if (!image.mimetype || !allowedImageTypes.includes(image.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${image ? image.mimetype : 'undefined'} is not supported for Fashion images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+
+                const modifiedNameImage = `imagekit-${Date.now()}${path.extname(image.name)}`;
                 const { fileId, url } = await imagekit.upload({
-                    file: file.data,
-                    fileName: modifiedName
+                    file: image.data,
+                    fileName: modifiedNameImage,
                 });
-        
-                uploadedNewfashionImages.push({ fileId , url })
-                existingfashion.images = existingfashion.images.concat(uploadedNewfashionImages)
+
+                uploadedNewFashionImages.push({ fileId, url });
             }
-            else {
+        }
+
+        // if (newfashionPoster && !Array.isArray(newfashionPoster) || newfashionPoster.length > 0 ) {
+        if (newfashionPoster && !Array.isArray(newfashionPoster)) {
+            if (!newfashionPoster || !newfashionPoster.mimetype || !allowedImageTypes.includes(newfashionPoster.mimetype)) {
                 return res.status(400).json({
                     success: false,
-                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-                    });
-                }
+                    message: `File type ${newfashionPoster ? newfashionPoster.mimetype : 'undefined'} is not supported for fashionposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
             }
-        }
-
-        if(uploadedNewfashionPosterImage.length > 0){
-            existingfashion.posterimage.fileId = uploadedNewfashionPosterImage[0].fileId || uploadedNewfashionPosterImage[0].fileId
-            existingfashion.posterimage.url = uploadedNewfashionPosterImage[0].url || uploadedNewfashionPosterImage[0].url
+        
+            // Delete previous file before uploading new one
+            if (previousfashionPosterID.length > 0) {
+                await imagekit.deleteFile(previousfashionPosterID);
+            }
+        
+            // Handle the file upload for newfashionPoster
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(newfashionPoster.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newfashionPoster.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            uploadedNewfashionPoster.push({ fileId , url })
         }
         
-        if(uploadedNewfashionTeaser.length > 0){
-            existingfashion.teaser.fileId = uploadedNewfashionTeaser[0].fileId || uploadedNewfashionTeaser[0].fileId
-            existingfashion.teaser.url = uploadedNewfashionTeaser[0].url || uploadedNewfashionTeaser[0].url
+        if (newfashionVideo && !Array.isArray(newfashionVideo)) {
+            if (!newfashionVideo || !newfashionVideo.mimetype || !allowedVideoTypes.includes(newfashionVideo.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newfashionVideo ? newfashionVideo.mimetype : 'undefined'} is not supported for fashionvideo. Allowed video type: MP4`,
+                });
+            }
+        
+            // Delete previous file before uploading new one
+            if (previousfashionVideoID.length > 0) {
+                await imagekit.deleteFile(previousfashionVideoID);
+            }
+        
+            // Handle the file upload for newfashionVideo
+            const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(newfashionVideo.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newfashionVideo.data,
+                fileName: modifiedNameVideo,
+            });
+            
+            uploadedNewfashionVideo.push({ fileId , url })
+        
+        }
+
+        if(uploadedNewFashionImages.length > 0){
+            existingfashion.images = existingfashion.images.concat(uploadedNewFashionImages)
+        }
+
+        if(uploadedNewfashionPoster.length > 0){
+            existingfashion.posterimage.fileId = uploadedNewfashionPoster[0].fileId || uploadedNewfashionPoster[0].fileId
+            existingfashion.posterimage.url = uploadedNewfashionPoster[0].url || uploadedNewfashionPoster[0].url
+        }
+
+        if(uploadedNewfashionVideo.length > 0){
+            existingfashion.teaser.fileId = uploadedNewfashionVideo[0].fileId || uploadedNewfashionVideo[0].fileId
+            existingfashion.teaser.url = uploadedNewfashionVideo[0].url || uploadedNewfashionVideo[0].url
         }
 
         await existingfashion.save();
@@ -1827,112 +1813,114 @@ exports.createevent = catchAsyncError(async (req, res, next) => {
 });
 
 exports.updateevent = catchAsyncError(async (req,res,next)=>{
-    const existingevent = await eventModel.findById(req.params.id).exec()
-    const previouseventPosterID = existingevent.posterimage.fileId
-    const previouseventVideoID = existingevent.teaser.fileId
-    let neweventPoster = req.files?.posterimage
-    let neweventVideo = req.files?.teaser
-    let files = req.files?.images
+    const existingEvent = await eventModel.findById(req.params.id).exec()
+    const previousEventPosterID = existingEvent.posterimage.fileId
+    const previousEventVideoID = existingEvent.teaser.fileId
+    let newEventPoster = req.files?.posterimage
+    let newEventVideo = req.files?.teaser
+    let newEventImages = req.files?.images; 
 
-    const { modelname , location, country } = req.body;
+    const { modelname, location, country } = req.body;
 
-        existingevent.modelname = modelname || existingevent.modelname
-        existingevent.location = location || existingevent.location
-        existingevent.country = country || existingevent.country
+        existingEvent.modelname = modelname || existingEvent.modelname
+        existingEvent.location = location || existingEvent.location
+        existingEvent.country = country || existingEvent.country
 
-        const uploadedNeweventPosterImage = [];
-        const uploadedNeweventTeaser = [];
-        const uploadedNeweventImages = [];
+        const uploadedNewEventPoster = [];
+        const uploadedNewEventVideo = [];
+        const uploadedNewEventImages = [];
         const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
         const allowedVideoTypes = ['video/mp4'];
-            
-            if (neweventPoster && !Array.isArray(neweventPoster)) {
-                if (!neweventPoster || !neweventPoster.mimetype || !allowedImageTypes.includes(neweventPoster.mimetype)) {
-                    return res.status(400).json({
-                        success: false,
-                        message: `File type ${neweventPoster ? neweventPoster.mimetype : 'undefined'} is not supported for eventposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-                    });
-                }
-            
-                // Delete previous file before uploading new one
-                if (previouseventPosterID.length > 0) {
-                    await imagekit.deleteFile(previouseventPosterID);
-                }
-            
-                // Handle the file upload for neweventPoster
-                const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(neweventPoster.name)}`;
-                const { fileId, url } = await imagekit.upload({
-                    file: neweventPoster.data,
-                    fileName: modifiedNamePoster,
-                });
-                
-                uploadedNeweventPosterImage.push({ fileId , url })
-            }
         
-            if (neweventVideo && !Array.isArray(neweventVideo)) {
-                if (!neweventVideo || !neweventVideo.mimetype || !allowedVideoTypes.includes(neweventVideo.mimetype)) {
-                    return res.status(400).json({
-                        success: false,
-                        message: `File type ${neweventVideo ? neweventVideo.mimetype : 'undefined'} is not supported for eventvideo. Allowed video type: MP4`,
-                    });
-                }
-            
-                // Delete previous file before uploading new one
-                if (previouseventVideoID.length > 0) {
-                    await imagekit.deleteFile(previouseventVideoID);
-                }
-            
-                // Handle the file upload for neweventVideo
-                const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(neweventVideo.name)}`;
-                const { fileId, url } = await imagekit.upload({
-                    file: neweventVideo.data,
-                    fileName: modifiedNameVideo,
-                });
-                
-                uploadedNeweventTeaser.push({ fileId , url })
-            
-            }
+        // Handle newEventImages if present
+        if (newEventImages) {
+            const imagesArray = Array.isArray(newEventImages) ? newEventImages : [newEventImages];
 
-        if(!Array.isArray(files)){
-            files = [files]
-        }
-        
-        if(files.length > 0){
-            for (const file of files) {
-                if(allowedImageTypes.includes(file.mimetype)){
-        
-                const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
-        
+            for (const image of imagesArray) {
+                if (!image.mimetype || !allowedImageTypes.includes(image.mimetype)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `File type ${image ? image.mimetype : 'undefined'} is not supported for Event images. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    });
+                }
+
+                const modifiedNameImage = `imagekit-${Date.now()}${path.extname(image.name)}`;
                 const { fileId, url } = await imagekit.upload({
-                    file: file.data,
-                    fileName: modifiedName
+                    file: image.data,
+                    fileName: modifiedNameImage,
                 });
-        
-                uploadedNeweventImages.push({ fileId , url })
-                existingevent.images = existingevent.images.concat(uploadedNeweventImages)
+
+                uploadedNewEventImages.push({ fileId, url });
             }
-            else {
+        }
+
+
+
+        
+        // if (newEventPoster && !Array.isArray(newEventPoster) || newEventPoster.length > 0 ) {
+        if (newEventPoster && !Array.isArray(newEventPoster)) {
+            if (!newEventPoster || !newEventPoster.mimetype || !allowedImageTypes.includes(newEventPoster.mimetype)) {
                 return res.status(400).json({
                     success: false,
-                    message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
-                    });
-                }
+                    message: `File type ${newEventPoster ? newEventPoster.mimetype : 'undefined'} is not supported for Eventposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                });
             }
-        }
-
-
-        if(uploadedNeweventPosterImage.length > 0){
-            existingevent.posterimage.fileId = uploadedNeweventPosterImage[0].fileId || uploadedNeweventPosterImage[0].fileId
-            existingevent.posterimage.url = uploadedNeweventPosterImage[0].url || uploadedNeweventPosterImage[0].url
+        
+            // Delete previous file before uploading new one
+            if (previousEventPosterID.length > 0) {
+                await imagekit.deleteFile(previousEventPosterID);
+            }
+        
+            // Handle the file upload for newEventPoster
+            const modifiedNamePoster = `imagekit-${Date.now()}${path.extname(newEventPoster.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newEventPoster.data,
+                fileName: modifiedNamePoster,
+            });
+            
+            uploadedNewEventPoster.push({ fileId , url })
         }
         
-        if(uploadedNeweventTeaser.length > 0){
-            existingevent.teaser.fileId = uploadedNeweventTeaser[0].fileId || uploadedNeweventTeaser[0].fileId
-            existingevent.teaser.url = uploadedNeweventTeaser[0].url || uploadedNeweventTeaser[0].url
+        if (newEventVideo && !Array.isArray(newEventVideo)) {
+            if (!newEventVideo || !newEventVideo.mimetype || !allowedVideoTypes.includes(newEventVideo.mimetype)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `File type ${newEventVideo ? newEventVideo.mimetype : 'undefined'} is not supported for Eventvideo. Allowed video type: MP4`,
+                });
+            }
+        
+            // Delete previous file before uploading new one
+            if (previousEventVideoID.length > 0) {
+                await imagekit.deleteFile(previousEventVideoID);
+            }
+        
+            // Handle the file upload for newEventVideo
+            const modifiedNameVideo = `imagekit-${Date.now()}${path.extname(newEventVideo.name)}`;
+            const { fileId, url } = await imagekit.upload({
+                file: newEventVideo.data,
+                fileName: modifiedNameVideo,
+            });
+            
+            uploadedNewEventVideo.push({ fileId , url })
+        
         }
 
-        await existingevent.save();
-        res.status(201).json(existingevent);
+        if(uploadedNewEventImages.length > 0){
+            existingEvent.images = existingEvent.images.concat(uploadedNewEventImages) 
+        }
+
+        if(uploadedNewEventPoster.length > 0){
+            existingEvent.posterimage.fileId = uploadedNewEventPoster[0].fileId || uploadedNewEventPoster[0].fileId
+            existingEvent.posterimage.url = uploadedNewEventPoster[0].url || uploadedNewEventPoster[0].url
+        }
+
+        if(uploadedNewEventVideo.length > 0){
+            existingEvent.teaser.fileId = uploadedNewEventVideo[0].fileId || uploadedNewEventVideo[0].fileId
+            existingEvent.teaser.url = uploadedNewEventVideo[0].url || uploadedNewEventVideo[0].url
+        }
+
+        await existingEvent.save();
+        res.status(201).json(existingEvent);
 })
 
 exports.updatesingleeventimage = catchAsyncError(async (req, res, next) => {
