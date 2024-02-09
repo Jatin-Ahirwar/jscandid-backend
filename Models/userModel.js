@@ -15,6 +15,12 @@ const userModel = new mongoose.Schema({
         maxlength:[15,"Password should not exceed more than 15 characters"],
         minlength:[6,"Password should have atleast 6 characters"],
     },
+    client:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"client"
+        }
+    ],
     stories:[
         {
             type:mongoose.Schema.Types.ObjectId,

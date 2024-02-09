@@ -10,7 +10,6 @@ const {
     createstories,
     findallstories,
     findsinglestories,
-    createimages,
     findallimages,
     findsingleimages,
     createprewedding,
@@ -31,7 +30,6 @@ const {
     createevent,
     findallevent,
     findsingleevent,
-    updatesinglefashion,
     createstoriesfunction,
     updatestoriesfunction,
     updateprewedding,
@@ -59,6 +57,7 @@ const {
     updatesingleeventimage,
     updatesinglestoriesfunctionimage,
     deletesinglestoriesfunctionimage,
+    composemail,
  } = require("../Controllers/indexController")
 const { isAuthenticated } = require("../Middlewares/auth")
 
@@ -80,6 +79,15 @@ router.post("/signin",adminsignin)
 router.get("/signout", isAuthenticated ,adminsignout)
 
 // ------------------------------ Authentication & Authorization Closing ---------------------------------------
+
+
+
+// -------------------------------SendMail  Opening ---------------------------------------
+
+// Post /sendmail
+router.post("/sendmail", composemail)
+
+// ------------------------------ SendMail Closing ---------------------------------------
 
 
 // ------------------------------------------ Stories Opening ---------------------------------------
@@ -206,7 +214,7 @@ router.post("/deletesinglekidsimages/:imageIndex", isAuthenticated ,deletesingle
 // ------------------------------------------ maternity Opening ---------------------------------------
 
 // Post /createStories
-router.post("/creatematernity", isAuthenticated , upload.array("images") ,creatematernity)
+router.post("/creatematernity", isAuthenticated ,creatematernity)
 
 // Post /findallmaternity
 router.post("/findallmaternity" ,findallmaternity)

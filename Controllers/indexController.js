@@ -14,26 +14,11 @@ const maternityModel = require("../Models/maternity.js")
 const imagekit = require("../utils/imagekit.js").initImageKit()
 const multer = require("multer")
 const path = require("path");
-const user = require("../Models/userModel.js");
 const prewedding = require("../Models/prewedding.js");
+const { sendmail } = require("../utils/nodemailer.js");
+const { receiveEmails } = require("../utils/imap.js");
 
-
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, './public/uploads')
-    },
-    filename: function (req, file, cb) {
-      const nd = new Date()
-      const fn = nd.getTime() + Math.floor(Math.random()*1000000) + path.extname(file.originalname)
-      cb(null, file.fieldname + fn)
-    }
-})
-  
-exports.upload = multer({ storage: storage })
-
-const upload = multer({ storage: storage })
-    
+ 
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
     res.json({message:"home page"}); 
@@ -84,6 +69,22 @@ exports.adminsignout = catchAsyncError(async (req,res,next) =>{
 })
 
 // ------------------------------ Authentication & Authorization Closing ---------------------------------------
+
+// ------------------------------------------Client Opening ---------------------------------------
+
+
+// ------------------------------------------Client Closing ---------------------------------------
+
+// exports.composemail = catchAsyncError(async (req,res,next)=>{
+//     const { eventdetails , eventtype , dates , venue , contact , email , applicantname , bridename , groomname  } = req.body
+//     sendmail(req,res,next)
+//     res.json({message : "mail has been succesfully sended !"}); 
+// })
+exports.composemail = catchAsyncError(async (req,res,next)=>{
+    const { eventdetails , eventtype , dates , venue , contact , email , applicantname , bridename , groomname  } = req.body
+    
+    res.json({message : "mail has been succesfully sended !"}); 
+})
 
 
 
@@ -302,7 +303,7 @@ exports.deletesinglestories = catchAsyncError(async (req, res, next) => {
     
 
     const index = userID.stories.indexOf(StoryID);
-    
+
     if (index !== -1) {
         userID.stories.splice(index, 1);
         await userID.save();
