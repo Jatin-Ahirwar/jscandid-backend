@@ -11,12 +11,11 @@ const kidsModel = require("../Models/kids.js")
 const fashionModel = require("../Models/fashion.js")
 const eventModel = require("../Models/event.js")
 const maternityModel = require("../Models/maternity.js")
+const clientModel = require("../Models/client.js")
 const imagekit = require("../utils/imagekit.js").initImageKit()
-const multer = require("multer")
 const path = require("path");
 const prewedding = require("../Models/prewedding.js");
 const { sendmail } = require("../utils/nodemailer.js");
-const { receiveEmails } = require("../utils/imap.js");
 
  
 
@@ -75,16 +74,30 @@ exports.adminsignout = catchAsyncError(async (req,res,next) =>{
 
 // ------------------------------------------Client Closing ---------------------------------------
 
-// exports.composemail = catchAsyncError(async (req,res,next)=>{
-//     const { eventdetails , eventtype , dates , venue , contact , email , applicantname , bridename , groomname  } = req.body
-//     sendmail(req,res,next)
-//     res.json({message : "mail has been succesfully sended !"}); 
-// })
 exports.composemail = catchAsyncError(async (req,res,next)=>{
+    const userID = await userModel.findOne({email : process.env.MAIL_EMAIL_ADDRESS}).exec()
     const { eventdetails , eventtype , dates , venue , contact , email , applicantname , bridename , groomname  } = req.body
+    const newClient = new clientModel({
+        eventdetails, 
+        eventtype, 
+        dates, 
+        venue, 
+        contact, 
+        email, 
+        applicantname, 
+        bridename, 
+        groomname
+    })
     
-    res.json({message : "mail has been succesfully sended !"}); 
+    newClient.user = newClient._id
+    userID.client.push(newClient._id)
+    await newClient.save()
+    await userID.save()
+
+    sendmail(req,res,next)
+    res.json({message : "mail has been succesfully sended !" , userID}); 
 })
+
 
 
 
