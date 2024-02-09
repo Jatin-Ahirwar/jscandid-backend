@@ -264,22 +264,55 @@ exports.findsinglestories = catchAsyncError(async (req,res,next) =>{
     res.status(201).json({success:true , singlestorie })
 })
 
-exports.deletesinglestories = catchAsyncError(async (req,res,next) =>{
+exports.deletesinglestories = catchAsyncError(async (req, res, next) => {
+    const userID = await userModel.findById(req.id).exec();
+    const StoryID = req.params.id;
     
-    const user = await userModel.findById(req.id).exec()
-    const singlestories = await storiesModel.findById(req.params.id).exec()
+    // Find the Story by ID
+    const Story = await storiesModel.findById(StoryID).populate("storiesfunction").exec();
+    const Storyposter = Story.posterimage ? Story.posterimage.fileId : null;
+    const Storyvideo = Story.teaser ? Story.teaser.fileId : null;
+    if (!Story) {
+        return res.status(404).json({
+            success: false,
+            message: "Story not found",
+        });
+    }
+    
+    for (const functionData of Story.storiesfunction) {
+        // Check if images is an array before iterating over it
+        if (Array.isArray(functionData.images)) {
+            for (const image of functionData.images) {
+                // console.log(image.fileId);
+                await imagekit.deleteFile(image.fileId);
+            }
+        }
 
-    await storiesModel.deleteOne({ _id: singlestories._id})
-    const indexToRemove = user.stories.indexOf(singlestories._id);
-    
-    if (indexToRemove !== -1) {
-        user.stories.splice(indexToRemove, 1);
-        await user.save();
+        // Delete the associated storiesfunction from MongoDB
+        await storiesFunctionModel.deleteOne({ _id: functionData._id });
     }
 
-    res.status(201).json({success:true , singlestories , user  })
+    await Promise.all([
+        imagekit.deleteFile(Storyposter),
+        imagekit.deleteFile(Storyvideo),
+    ])
+
+    // Update the user model to remove the Story reference
+    await storiesModel.deleteOne({ _id: Story._id})
     
-})
+
+    const index = userID.stories.indexOf(StoryID);
+    
+    if (index !== -1) {
+        userID.stories.splice(index, 1);
+        await userID.save();
+    }
+
+    res.status(200).json({
+        success: true,
+        message: "Story deleted successfully",
+    });
+});
 
 exports.createstoriesfunction = catchAsyncError(async (req, res, next) => {
     const stories = await storiesModel.findById(req.params.id).exec()
@@ -469,22 +502,43 @@ exports.deletesinglestoriesfunctionimage = catchAsyncError(async (req, res, next
     });
 });
 
-exports.deletesingleStoriesfunction = catchAsyncError(async (req,res,next) =>{
-
-    const stories = await storiesModel.findById(req.params.id1).exec()
-    const storiesFunctionID = await storiesFunctionModel.findById(req.params.id2).exec()
-
-    await storiesFunctionModel.deleteOne({ _id : storiesFunctionID._id })
-    const indexToRemove = stories.storiesfunction.indexOf(storiesFunctionID._id)
+exports.deletesingleStoriesfunction = catchAsyncError(async (req, res, next) => {
+    const storiesID = req.params.id1;
+    const storiesFunctionID = req.params.id2;
+    const stories = await storiesModel.findById(storiesID).exec()
     
-    if (indexToRemove !== -1) {
-        stories.storiesfunction.splice(indexToRemove, 1);
+    // Find the storiesFunction by ID
+    const storiesFunction = await storiesFunctionModel.findById(storiesFunctionID).exec()
+    const storiesFunctionimages = storiesFunction.images
+
+    if (!storiesFunction) {
+        return res.status(404).json({
+            success: false,
+            message: "storiesFunction not found",
+        });
+    }
+    if(storiesFunction){
+        for (const image of storiesFunctionimages) {
+            await imagekit.deleteFile(image.fileId);
+        }    
+    }
+
+    // Update the user model to remove the storiesFunction reference
+    await storiesFunctionModel.deleteOne({ _id: storiesFunction._id})
+    
+    const index = stories.storiesfunction.indexOf(storiesFunctionID);
+    if (index !== -1) {
+        stories.storiesfunction.splice(index, 1);
         await stories.save();
     }
-    
-    res.status(201).json({success:true , stories, storiesFunctionID  })
-    
-})
+
+    res.status(200).json({
+        success: true,
+        message: "storiesFunction deleted successfully",
+        index
+    });
+});
+
 
 // ------------------------------------------ Stories Closing ---------------------------------------
 
