@@ -16,8 +16,8 @@ const imagekit = require("../utils/imagekit.js").initImageKit()
 const path = require("path");
 const prewedding = require("../Models/prewedding.js");
 const { sendmail } = require("../utils/nodemailer.js");
-
- 
+const { ImageCompressor } = require("../utils/ImageCompressor.js")
+const fs = require('fs');
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
     res.json({message:"home page"}); 
@@ -88,18 +88,15 @@ exports.composemail = catchAsyncError(async (req,res,next)=>{
         bridename, 
         groomname
     })
-    
+
     newClient.user = newClient._id
     userID.client.push(newClient._id)
     await newClient.save()
     await userID.save()
 
     sendmail(req,res,next)
-    res.json({message : "mail has been succesfully sended !" , userID}); 
+    res.json({ message : "mail has been succesfully sended !" , newClient}); 
 })
-
-
-
 
 // ------------------------------------------Stories Opening ---------------------------------------
 
@@ -623,6 +620,78 @@ exports.createImages = catchAsyncError(async (req, res, next) => {
         });
     }
 });
+
+// exports.createImages = catchAsyncError(async (req, res, next) => {
+//     const userID = await userModel.findById(req.id).exec()
+//     let files = req.files.images;
+
+//     const uploadedFiles = [];
+//     const allowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
+
+//     if (!Array.isArray(files)) {
+//         // If it's not an array, convert it to an array
+//         files = [files];
+//     }
+
+//     for (const file of files) {
+//         if (allowedFileTypes.includes(file.mimetype)) {
+//             const modifiedName = `imagekit-${Date.now()}${path.extname(file.name)}`;
+    
+//             console.log(`Input file path: ${file.path}`); // Debugging
+    
+//             // Compress the file (use modifiedName for both input and output)
+//             await ImageCompressor(file.path, modifiedName);
+    
+//             // Now, use the compressed file for uploading
+//             const { fileId, url } = await imagekit.upload({
+//                 file: fs.readFileSync(modifiedName),
+//                 fileName: modifiedName
+//             });
+    
+//             // Remove the temporary compressed file
+//             fs.unlinkSync(modifiedName);
+    
+//             uploadedFiles.push({ fileId, url, mimetype: file.mimetype });
+//         } else {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: `File type ${file.mimetype} is not supported. Allowed file types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+//             });
+//         }
+//     }    
+    
+//     console.log(uploadedFiles)
+//     // res.json(uploadedFiles)
+//     const imagesEntry = await imagesModel.findOne({ user: userID._id });
+
+//     if (!imagesEntry) {
+//         // If not, create a new entry
+//         const newImagesEntry = new imagesModel({
+//             images: uploadedFiles,
+//         });
+
+//         newImagesEntry.user = userID._id
+//         userID.images.push(newImagesEntry._id)
+//         await newImagesEntry.save();
+//         await userID.save()
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Files uploaded successfully",
+//             imagesEntry: newImagesEntry,
+//         });
+//     } else {
+
+//         imagesEntry.images = imagesEntry.images.concat(uploadedFiles);
+//         await imagesEntry.save();
+
+//         res.status(200).json({
+//             success: true,
+//             message: "Files uploaded successfully",
+//             imagesEntry,
+//         });
+//     }
+// });
 
 exports.updateImages = catchAsyncError(async (req, res, next) => {
     const userID = await userModel.findById(req.id).exec();
