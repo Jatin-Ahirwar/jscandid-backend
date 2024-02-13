@@ -36,13 +36,10 @@ const clientModel = new mongoose.Schema({
     },
     bridename:{
         type:String,
-        minlength:[2,"bridename should have atleast 6 characters"]
     },
     groomname:{
         type:String,
-        minlength:[2,"groomname should have atleast 6 characters"]
     },
-
 })
 
 const client = mongoose.model("client",clientModel)

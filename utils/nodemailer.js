@@ -27,8 +27,8 @@ exports.sendmail = (req,res,next) =>{
             <p><strong>Applicant Name:</strong> ${req.body.applicantname}</p>
             
             ${req.body.eventtype === 'wedding' ? `
-                <p><strong>Bride Name (optional):</strong> ${req.body.brideName || 'Not provided'}</p>
-                <p><strong>Groom Name (optional):</strong> ${req.body.groomName || 'Not provided'}</p>
+                <p><strong>Bride Name (optional):</strong> ${req.body.bridename || 'Not provided'}</p>
+                <p><strong>Groom Name (optional):</strong> ${req.body.groomname || 'Not provided'}</p>
             ` : ''}`
     };
     // const mailOptionsToUser = {
