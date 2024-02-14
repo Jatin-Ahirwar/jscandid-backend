@@ -585,11 +585,10 @@ exports.createImages = catchAsyncError(async (req, res, next) => {
             try {
                 // Compress the file before uploading
                 const compressedBuffer = await ImageCompressor(file.data);
-
                 // Upload the compressed buffer to ImageKit
                 const { fileId, url } = await imagekit.upload({
                     file: compressedBuffer,
-                    fileName: `Images-compressed-${Date.now()}${path.extname(file.name)}`,
+                    fileName: `compressed-Images-${Date.now()}${path.extname(file.name)}`,
                 });
 
                 uploadedFiles.push({ fileId, url, mimetype: file.mimetype });
@@ -1180,7 +1179,8 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
     let trailerPoster = req.files.trailerposter;
     let trailerVideo = req.files.trailervideo;
 
-    
+    console.log(trailerPoster,trailerVideo)
+    console.log(req.body)    
     const uploadedTrailerPoster = [];
     const uploadedTrailerVideo = [];
     const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
