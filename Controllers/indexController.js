@@ -18,6 +18,7 @@ const prewedding = require("../Models/prewedding.js");
 const { sendmail } = require("../utils/nodemailer.js");
 const { ImageCompressor } = require("../utils/ImageCompressor.js")
 const fs = require('fs');
+const { VideoCompressor } = require("../utils/VideoCompressor.js");
 
 exports.homepage = catchAsyncError(async (req,res,next)=>{
     res.json({message:"home page"}); 
@@ -1179,8 +1180,8 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
     let trailerPoster = req.files.trailerposter;
     let trailerVideo = req.files.trailervideo;
 
-    console.log(trailerPoster,trailerVideo)
-    console.log(req.body)    
+    // console.log(trailerPoster,trailerVideo)
+    // console.log(req.body)    
     const uploadedTrailerPoster = [];
     const uploadedTrailerVideo = [];
     const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
@@ -1220,7 +1221,7 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
         });
     }
     
-        const compressedBuffer = await ImageCompressor(file.data);
+        const compressedBuffer = await VideoCompressor(file.data);
         const modifiedName = `Trailer-compressed-Teaser-${Date.now()}${path.extname(file.name)}`;
         const { fileId, url } = await imagekit.upload({
             file: compressedBuffer,
