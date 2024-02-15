@@ -217,47 +217,47 @@
 
 
 
-// const fs = require('fs');
-// const sharp = require('sharp');
-// const ffmpegPath = require('ffmpeg-static');
-// const { execFile } = require('child_process');
+const fs = require('fs');
+const sharp = require('sharp');
+const ffmpegPath = require('ffmpeg-static');
+const { execFile } = require('child_process');
 
-// async function compressVideoBuffer(inputVideoBuffer, quality, bitrate) {
-//   const ffmpegCommand = [
-//     '-i', 'pipe:0', // Input from stdin
-//     '-c:v', 'libx264',
-//     '-b:v', `${bitrate}k`,
-//     '-crf', quality.toString(),
-//     '-f', 'mp4',
-//     '-movflags', 'frag_keyframe+empty_moov', // Force seekable output
-//     'pipe:1', // Output to stdout
-//   ];
+async function compressVideoBuffer(inputVideoBuffer, quality, bitrate) {
+  const ffmpegCommand = [
+    '-i', 'pipe:0', // Input from stdin
+    '-c:v', 'libx264',
+    '-b:v', `${bitrate}k`,
+    '-crf', quality.toString(),
+    '-f', 'mp4',
+    '-movflags', 'frag_keyframe+empty_moov', // Force seekable output
+    'pipe:1', // Output to stdout
+  ];
 
-//   return new Promise((resolve, reject) => {
-//     const ffmpegProcess = execFile(ffmpegPath, ffmpegCommand, { encoding: 'binary', maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
-//       if (error) {
-//         console.error('Error compressing video:', stderr);
-//         reject(error);
-//       } else {
-//         resolve(Buffer.from(stdout, 'binary'));
-//       }
-//     });
+  return new Promise((resolve, reject) => {
+    const ffmpegProcess = execFile(ffmpegPath, ffmpegCommand, { encoding: 'binary', maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error compressing video:', stderr);
+        reject(error);
+      } else {
+        resolve(Buffer.from(stdout, 'binary'));
+      }
+    });
 
-//     ffmpegProcess.stdin.write(inputVideoBuffer, 'binary');
-//     ffmpegProcess.stdin.end();
-//   });
-// }
+    ffmpegProcess.stdin.write(inputVideoBuffer, 'binary');
+    ffmpegProcess.stdin.end();
+  });
+}
 
-// exports.VideoCompressor = async (inputVideoBuffer, quality = 30, bitrate = 1000000) => {
-//   try {
-//     const compressedBuffer = await compressVideoBuffer(inputVideoBuffer, quality, bitrate);
-//     console.log('Video compression successful.');
-//     return compressedBuffer;
-//   } catch (error) {
-//     console.error('Error compressing video:', error.message);
-//     throw error;
-//   }
-// };
+exports.VideoCompressor = async (inputVideoBuffer, quality = 30, bitrate = 1000000) => {
+  try {
+    const compressedBuffer = await compressVideoBuffer(inputVideoBuffer, quality, bitrate);
+    console.log('Video compression successful.');
+    return compressedBuffer;
+  } catch (error) {
+    console.error('Error compressing video:', error.message);
+    throw error;
+  }
+};
 
 
 // ------------------------working 2 
@@ -323,69 +323,117 @@
 
 
 
+// const { spawn } = require('child_process');
+// const ffmpegPath = require('ffmpeg-static');
+
+// async function compressVideoBuffer(inputVideoBuffer, quality = 30, bitrate = 1000000) {
+//   // const ffmpegCommand = [
+//   //   '-i', 'pipe:0', // Input from stdin
+//   //   '-c:v', 'libx264',
+//   //   '-preset', 'fast', // Use the "fast" preset for faster encoding
+//   //   '-b:v', `${bitrate}k`,
+//   //   '-crf', quality.toString(),
+//   //   '-f', 'mp4',
+//   //   '-movflags', 'frag_keyframe+empty_moov', // Force seekable output
+//   //   'pipe:1', // Output to stdout
+//   // ];
+//   const ffmpegCommand = [
+//     '-i', 'pipe:0', // Input from stdin
+//     '-c:v', 'libx264',
+//     '-preset', 'medium', // or 'slow', 'veryslow'
+//     '-b:v', `${bitrate}k`, // Adjust bitrate according to your needs
+//     '-crf', '23', // Adjust CRF value
+//     '-f', 'mp4',
+//     '-movflags', 'frag_keyframe+empty_moov', // Force seekable output
+//     'pipe:1', // Output to stdout
+//   ];
+  
+
+//   return new Promise((resolve, reject) => {
+//     const ffmpegProcess = spawn(ffmpegPath, ffmpegCommand, { stdio: ['pipe', 'pipe', 'ignore'] });
+//     let compressedBuffer = Buffer.alloc(0);
+
+//     ffmpegProcess.on('error', (error) => {
+//       console.error('Error starting ffmpeg process:', error);
+//       reject(error);
+//     });
+
+//     ffmpegProcess.stdout.on('data', (data) => {
+//       compressedBuffer = Buffer.concat([compressedBuffer, data]);
+//     });
+
+//     // Check if stderr is not null before attaching event handlers
+//     if (ffmpegProcess.stderr !== null) {
+//       ffmpegProcess.stderr.on('data', (data) => {
+//         console.error('FFmpeg error:', data.toString());
+//       });
+//     }
+
+//     ffmpegProcess.on('close', (code) => {
+//       if (code !== 0) {
+//         console.error('FFmpeg process exited with non-zero code:', code);
+//         reject(new Error(`FFmpeg process exited with code ${code}`));
+//       } else {
+//         resolve(compressedBuffer);
+//       }
+//     });
+
+//     ffmpegProcess.stdin.write(inputVideoBuffer);
+//     ffmpegProcess.stdin.end();
+//   });
+// }
+
+
+// exports.VideoCompressor = async (inputVideoBuffer, quality = 30, bitrate = 1000000) => {
+//   try {
+//     const compressedBuffer = await compressVideoBuffer(inputVideoBuffer, quality, bitrate);
+//     console.log('Video compression successful.');
+//     return compressedBuffer;
+//   } catch (error) {
+//     console.error('Error compressing video:', error.message);
+//     throw error;
+//   }
+// };
 
 
 
 
 
-const { spawn } = require('child_process');
-const ffmpegPath = require('ffmpeg-static');
 
-async function compressVideoBuffer(inputVideoBuffer, quality = 30, bitrate = 1000000) {
-  const ffmpegCommand = [
-    '-i', 'pipe:0', // Input from stdin
-    '-c:v', 'libx264',
-    '-b:v', `${bitrate}k`,
-    '-crf', quality.toString(),
-    '-movflags', 'frag_keyframe+empty_moov', // Force seekable output
-    'pipe:1', // Output to stdout
-  ];
+// videoCompression.js
+// const fs = require('fs');
+// const tmp = require('tmp');
+// const { PassThrough } = require('stream');
+// const ffmpeg = require('fluent-ffmpeg');
 
-  return new Promise((resolve, reject) => {
-    const ffmpegProcess = spawn(ffmpegPath, ffmpegCommand, { stdio: ['pipe', 'pipe', 'ignore'] });
+// exports.VideoCompressor = async (inputVideoBuffer, options = {}) => {
+//   return new Promise((resolve, reject) => {
+//     const inputStream = new PassThrough();
+//     const outputBuffer = [];
 
-    ffmpegProcess.on('error', (error) => {
-      console.error('Error starting ffmpeg process:', error);
-      reject(error);
-    });
+//     // Write the input buffer to the input stream
+//     inputStream.end(inputVideoBuffer);
 
-    let ffmpegStdoutData = Buffer.from([]);
-    let ffmpegStderrData = Buffer.from([]);
+//     // Perform video compression using fluent-ffmpeg with the streams
+//     const command = ffmpeg()
+//     .input(inputStream)
+//     .videoCodec(options.videoCodec || 'libx264')
+//     .audioCodec(options.audioCodec || 'aac')
+//     .outputFormat('mp4')
+//     .on('end', () => {
+//       const compressedVideoBuffer = Buffer.concat(outputBuffer);
+//       resolve(compressedVideoBuffer);
+//     })
+//     .on('error', (err) => {
+//       console.error('Error compressing video:', err.message);
+//       reject(err);
+//     })
+//     .on('stderr', console.error);
+  
+//     // Use simple buffer concatenation
+//     command.pipe(outputBuffer);
 
-    if (ffmpegProcess.stdout !== null) {
-      ffmpegProcess.stdout.on('data', (data) => {
-        ffmpegStdoutData = Buffer.concat([ffmpegStdoutData, data]);
-      });
-    }
-
-    if (ffmpegProcess.stderr !== null) {
-      ffmpegProcess.stderr.on('data', (data) => {
-        ffmpegStderrData = Buffer.concat([ffmpegStderrData, data]);
-      });
-    }
-
-    ffmpegProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve(ffmpegStdoutData);
-      } else {
-        console.error('FFmpeg process exited with non-zero code:', code);
-        console.error('FFmpeg stderr:', ffmpegStderrData.toString());
-        reject(new Error(`FFmpeg process exited with code ${code}`));
-      }
-    });
-
-    ffmpegProcess.stdin.write(inputVideoBuffer, 'binary');
-    ffmpegProcess.stdin.end();
-  });
-}
-
-exports.VideoCompressor = async (inputVideoBuffer, quality = 30, bitrate = 1000000) => {
-  try {
-    const compressedBuffer = await compressVideoBuffer(inputVideoBuffer, quality, bitrate);
-    console.log('Video compression successful.');
-    return compressedBuffer;
-  } catch (error) {
-    console.error('Error compressing video:', error.message);
-    throw error;
-  }
-};
+//     // Run the ffmpeg command
+//     command.run();
+//   });
+// };

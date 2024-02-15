@@ -38,6 +38,7 @@
     "readable-stream": "^4.5.2",
     "sharp": "^0.33.2",
     "smtp": "^0.1.4",
+    "tmp": "^0.2.1",
     "uuid": "^9.0.1",
     "videoconverter": "^0.1.0"
   }
