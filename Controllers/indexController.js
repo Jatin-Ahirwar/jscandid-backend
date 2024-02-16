@@ -827,7 +827,7 @@ exports.createprewedding = catchAsyncError(async (req, res, next) => {
         
         }
 
-        const compressedBuffer = await ImageCompressor(file.data);
+        const compressedBuffer = await VideoCompressor(file.data);
         const modifiedName = `Prewedding-compressed-teaser-${Date.now()}${path.extname(file.name)}`;
         const { fileId, url } = await imagekit.upload({
             file: compressedBuffer,
@@ -844,8 +844,7 @@ exports.createprewedding = catchAsyncError(async (req, res, next) => {
     }
 
     for (const file of files) {
-        if(!allowedImageTypes.includes(file.mimetype)){
-
+        if(allowedImageTypes.includes(file.mimetype)){
 
         const compressedBuffer = await ImageCompressor(file.data);
         const modifiedName = `Prewedding-compressed-images-${Date.now()}${path.extname(file.name)}`;
@@ -853,7 +852,6 @@ exports.createprewedding = catchAsyncError(async (req, res, next) => {
             file: compressedBuffer,
             fileName: modifiedName,
         });
-            
 
         uploadedFiles.push({ fileId, url  });
     }
@@ -1179,9 +1177,7 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
     let { date, bridename, groomname, location, country } = req.body;
     let trailerPoster = req.files.trailerposter;
     let trailerVideo = req.files.trailervideo;
-
-    // console.log(trailerPoster,trailerVideo)
-    // console.log(req.body)    
+    
     const uploadedTrailerPoster = [];
     const uploadedTrailerVideo = [];
     const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/avif', 'image/webp'];
@@ -1258,6 +1254,7 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
             trailer: newTrailer,
         });
 });
+
 
 exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
     const existingtrailer = await trailerModel.findById(req.params.id).exec()
