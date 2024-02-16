@@ -800,7 +800,7 @@ exports.createprewedding = catchAsyncError(async (req, res, next) => {
         if (!allowedImageTypes.includes(file.mimetype)) {
             return res.status(400).json({
                 success: false,
-                    message: `File type ${file.mimetype} is not supported for trailerposter. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
+                    message: `File type ${file.mimetype} is not supported for posterimage. Allowed image types: PNG, JPG, JPEG, SVG, AVIF, WebP`,
             });
             
         }
@@ -822,7 +822,7 @@ exports.createprewedding = catchAsyncError(async (req, res, next) => {
         if (!allowedVideoTypes.includes(file.mimetype)) {
             return res.status(400).json({
                 success: false,
-            message: `File type ${file.mimetype} is not supported for trailervideo. Allowed video type: MP4`,
+            message: `File type ${file.mimetype} is not supported for teaser. Allowed video type: MP4`,
             });
         
         }
@@ -1254,7 +1254,6 @@ exports.createtrailer = catchAsyncError(async (req, res, next) => {
             trailer: newTrailer,
         });
 });
-
 
 exports.updatetrailer = catchAsyncError(async (req,res,next)=>{
     const existingtrailer = await trailerModel.findById(req.params.id).exec()
@@ -1737,7 +1736,7 @@ exports.createfashion = catchAsyncError(async (req, res, next) => {
             });
         }
     
-        const CompressedBuffer = await ImageCompressor(file.data)    
+        const CompressedBuffer = await VideoCompressor(file.data)    
         const modifiedName = `Compressee-Fashion-Teaser-${Date.now()}${path.extname(file.name)}`;
         const { fileId, url } = await imagekit.upload({
             file: CompressedBuffer,
@@ -2120,18 +2119,17 @@ exports.createevent = catchAsyncError(async (req, res, next) => {
         });
     }
     
-    const CompressedBuffer = await ImageCompressor(file.data)    
+    const CompressedBuffer = await VideoCompressor(file.data)    
     const modifiedName = `Compressed-Event-Teaser-${Date.now()}${path.extname(file.name)}`;
     const { fileId, url } = await imagekit.upload({
         file: CompressedBuffer,
         fileName: modifiedName
     });
-
         uploadedTeaser.push({ fileId, url });
     }
 
-    if (!Array.isArray(posterimage)) {
-        posterimage = [posterimage];
+    if (!Array.isArray(files)) {
+        files = [files];
     }
 
     for (const file of files) {
