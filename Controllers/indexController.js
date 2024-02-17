@@ -1738,7 +1738,7 @@ exports.createfashion = catchAsyncError(async (req, res, next) => {
     
         const CompressedBuffer = await VideoCompressor(file.data)    
         const modifiedName = `Compressee-Fashion-Teaser-${Date.now()}${path.extname(file.name)}`;
-        const { fileId, url } = await imagekit.upload({
+        const { fileId, url } = await imagekit.upload({ 
             file: CompressedBuffer,
             fileName: modifiedName
         });
