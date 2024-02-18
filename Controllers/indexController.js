@@ -147,7 +147,7 @@ exports.createstories = catchAsyncError(async (req, res, next) => {
             });
         }
         
-        const CompressedBuffer = await ImageCompressor(file.data)    
+        const CompressedBuffer = await VideoCompressor(file.data)    
         const modifiedName = `Compressed-Story-Teaser-${Date.now()}${path.extname(file.name)}`;
         const { fileId, url } = await imagekit.upload({
             file: CompressedBuffer,
