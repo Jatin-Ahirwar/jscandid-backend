@@ -955,7 +955,7 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
             }
         
             // Handle the file upload for newpreweddingVideo
-            const compressedBuffer = await ImageCompressor(newpreweddingVideo.data);
+            const compressedBuffer = await VideoCompressor(newpreweddingVideo.data);
             const modifiedName = `Updated-Prewedding-compressed-teaser-${Date.now()}${path.extname(newpreweddingVideo.name)}`;
             const { fileId, url } = await imagekit.upload({
                 file: compressedBuffer,
@@ -990,7 +990,7 @@ exports.updateprewedding = catchAsyncError(async (req,res,next)=>{
 
 
 
-        if(uploadedNewpreweddingTeaser.length > 0){
+        if(uploadedNewPreweddingImages.length > 0){
             existingprewedding.images = existingprewedding.images.concat(uploadedNewPreweddingImages)     
         }
 
