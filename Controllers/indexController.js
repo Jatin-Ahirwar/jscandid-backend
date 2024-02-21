@@ -525,12 +525,12 @@ exports.deletesinglestoriesfunctionimage = catchAsyncError(async (req, res, next
 });
 
 exports.deletesingleStoriesfunction = catchAsyncError(async (req, res, next) => {
-    const storiesID = req.params.id1;
-    const storiesFunctionID = req.params.id2;
+    const storiesID = req.params.storyId;
+    const storiesFunctionID = req.params.functionId;
     const stories = await storiesModel.findById(storiesID).exec()
     
     // Find the storiesFunction by ID
-    const storiesFunction = await storiesFunctionModel.findById(storiesFunctionID).exec()
+    const storiesFunction = await storiesFunctionModel.findById(storiesFunctionID).exec();
     const storiesFunctionimages = storiesFunction.images
 
     if (!storiesFunction) {
@@ -539,8 +539,12 @@ exports.deletesingleStoriesfunction = catchAsyncError(async (req, res, next) => 
             message: "storiesFunction not found",
         });
     }
+
+    console.log(stories,storiesFunction,storiesFunctionimages)
+
     if(storiesFunction){
         for (const image of storiesFunctionimages) {
+            console.log(image)
             await imagekit.deleteFile(image.fileId);
         }    
     }
@@ -557,7 +561,6 @@ exports.deletesingleStoriesfunction = catchAsyncError(async (req, res, next) => 
     res.status(200).json({
         success: true,
         message: "storiesFunction deleted successfully",
-        index
     });
 });
 
@@ -1104,6 +1107,7 @@ exports.deletesinglepreweddingimage = catchAsyncError(async (req, res, next) => 
     }
 
     const deletedImage = imagesEntry.images[index].fileId;
+    console.log(deletedImage)
 
     // Delete the image from ImageKit
     await imagekit.deleteFile(deletedImage);

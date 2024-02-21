@@ -120,7 +120,7 @@ router.post("/updatesinglestoriesfunctionimage/:id/:imageIndex" , isAuthenticate
 router.post("/deletesinglestoriesfunctionimage/:id/:imageIndex" , isAuthenticated , deletesinglestoriesfunctionimage)
 
 // Post /deletesingleStoriesfunction
-router.post("/deletesingleStoriesfunction/:id1/:id2" , isAuthenticated , deletesingleStoriesfunction)
+router.post("/deletesingleStoriesfunction/:storyId/:functionId" , isAuthenticated , deletesingleStoriesfunction)
 
 // ------------------------------------------ Stories Closing ---------------------------------------
 
