@@ -3,10 +3,7 @@ const express = require('express');
 const app = express()
 const cors = require("cors")
 const path = require("path")
-const fileUpload = require("express-fileupload");
-const expressFileuploader = require("express-fileuploader");
 var bodyParser = require('body-parser')
-
 
 // database connection
 require("./Models/database.js").connectDatabase()
@@ -20,8 +17,6 @@ app.use(logger("tiny"))
 // bodyparser
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -39,8 +34,6 @@ app.use(cookieparser())
 // express file-upload
 const fileupload = require("express-fileupload")
 app.use(fileupload())
-
-
 
 // routes
 app.use("/" , require("./Routes/indexRoutes.js"))

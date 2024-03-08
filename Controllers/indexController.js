@@ -40,7 +40,6 @@ exports.admin = catchAsyncError(async (req,res,next)=>{
     .populate("fashion")
     .populate("event")
     res.json(admin)
-    // console.log(admin)
 })
 
 // ------------------------------ Authentication & Authorization Opening ---------------------------------------
