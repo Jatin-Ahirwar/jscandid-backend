@@ -72,8 +72,6 @@ exports.adminsignout = catchAsyncError(async (req,res,next) =>{
 // ------------------------------------------Client Opening ---------------------------------------
 
 
-// ------------------------------------------Client Closing ---------------------------------------
-
 exports.composemail = catchAsyncError(async (req,res,next)=>{
     const userID = await userModel.findOne({email : process.env.MAIL_EMAIL_ADDRESS}).exec()
     const { eventdetails , eventtype , dates , venue , contact , email , applicantname , bridename , groomname  } = req.body
@@ -97,6 +95,8 @@ exports.composemail = catchAsyncError(async (req,res,next)=>{
     sendmail(req,res,next)
     res.json({ message : "mail has been succesfully sended !" , newClient}); 
 })
+
+// ------------------------------------------Client Closing ---------------------------------------
 
 // ------------------------------------------Stories Opening ---------------------------------------
 
