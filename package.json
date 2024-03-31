@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "audit": "^0.0.6",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
@@ -26,6 +27,7 @@
     "express-session": "^1.17.3",
     "ffmpeg": "^0.0.4",
     "ffmpeg-static": "^5.2.0",
+    "fix": "^0.0.6",
     "fluent-ffmpeg": "^2.1.2",
     "fs": "^0.0.1-security",
     "imagekit": "^5.0.0",
