@@ -48,6 +48,6 @@ app.all("*",(req,res,next) =>{
 app.use(generatedErrors)
 
 app.listen(
-  process.env.Port,
+  process.env.PORT,
   console.log(`server is running on port ${process.env.PORT}`)
 )
