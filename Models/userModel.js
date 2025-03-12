@@ -10,8 +10,8 @@ const userModel = new mongoose.Schema({
         match:[/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address'],
     },
     password:{
-        select:false,
         type:String,
+        select:false,
         maxlength:[15,"Password should not exceed more than 15 characters"],
         minlength:[6,"Password should have atleast 6 characters"],
     },

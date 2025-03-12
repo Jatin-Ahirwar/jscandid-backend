@@ -1,4 +1,4 @@
-require("dotenv").config({path:'./.env'})
+require('dotenv').config();
 const express = require('express');
 const app = express()
 const cors = require("cors")
@@ -24,10 +24,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 const session = require("express-session")
 const cookieparser = require("cookie-parser")
 app.use(session({
-  resave:true,
-  saveUninitialized:true,
-  secret:process.env.EXPRESS_SESSION_SECRET
-})) 
+  resave: true,
+  saveUninitialized: true,
+  secret: process.env.EXPRESS_SESSION_SECRET,  // Secret key from .env
+  cookie: { secure: false }  // Set to `true` if using HTTPS in production
+}));
 
 app.use(cookieparser())
 
@@ -38,15 +39,19 @@ app.use(fileupload())
 // routes
 app.use("/" , require("./Routes/indexRoutes.js"))
 
-// error handling
 
+// error handling
 const ErrorHandler = require("./utils/ErrorHandler.js")
 const { generatedErrors } = require("./Middlewares/error.js");
+
 app.all("*",(req,res,next) =>{
     next(new ErrorHandler(`Requested Url Not Found ${req.url}` , 404))
 })
 app.use(generatedErrors)
+// error handling
 
+
+// run app
 app.listen(
   process.env.PORT,
   console.log(`server is running on port ${process.env.PORT}`)
