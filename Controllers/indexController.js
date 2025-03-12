@@ -706,12 +706,12 @@ exports.updateImages = catchAsyncError(async (req, res, next) => {
 exports.findallimages = catchAsyncError(async (req,res,next) =>{
 
     const allImages = await imagesModel.find({}, 'images').exec();
-
+    
     if (allImages && allImages.length > 0) {
       const imagesArray = allImages.map(userImages => userImages.images).flat();
       res.status(200).json({ success: true, images: imagesArray });
     } else {
-      res.status(404).json({ error: 'No images found' });
+      res.status(201).json({ error: 'No images found' });
     }
 })
 
@@ -724,7 +724,7 @@ exports.findsingleimages = catchAsyncError(async (req, res, next) => {
       const singleImage = result.images[imageIndex];
       res.status(201).json({ success: true, singleImage });
     } else {
-      res.status(404).json({ error: 'Image not found' });
+      res.status(201).json({ error: 'Image not found' });
     }
 });
 
@@ -1538,7 +1538,7 @@ exports.findallkids = catchAsyncError(async (req,res,next) =>{
       const imagesArray = allImages.map(userImages => userImages.images).flat();
       res.status(200).json({ success: true, images: imagesArray });
     } else {
-      res.status(404).json({ error: 'No images found' });
+      res.status(201).json({ error: 'No images found' });
     }
 })
 
@@ -1645,7 +1645,7 @@ exports.findallmaternity = catchAsyncError(async (req,res,next) =>{
         const imagesArray = allimages.map(userimages => userimages.images).flat()
         res.status(200).json({message: true , imagesArray})
     }
-    res.status(404).json({message: "no images found" , })
+    res.status(201).json({message: "no images found" , })
 })
 
 exports.findsinglematernity = catchAsyncError(async (req,res,next) =>{
